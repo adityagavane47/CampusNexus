@@ -33,6 +33,9 @@
 ---
 
 ## 🏗️ Architecture
+
+![CampusNexus Workflow](workflow_diagram.png)
+
 - **Frontend**: React components for the Project Feed, Marketplace, and Profile.
 - **Backend API**: FastAPI handles AI matching logic and metadata storage.
 - **On-Chain Logic**: Algorand Smart Contracts handle all financial transactions and reputation minting.

@@ -8,6 +8,7 @@ import { ProjectFeed } from './components/feed/ProjectFeed';
 import { CreateProjectModal } from './components/feed/CreateProjectModal';
 import { Marketplace } from './components/marketplace/Marketplace';
 import { Profile } from './components/profile/Profile';
+import { SkillMatcher } from './components/feed/SkillMatcher';
 import { getCurrentNetwork } from './services/algorand';
 import './index.css';
 
@@ -17,6 +18,7 @@ function App() {
 
     const tabs = [
         { id: 'feed', label: 'Discover' },
+        { id: 'matcher', label: '✨ AI Match' },
         { id: 'marketplace', label: 'Marketplace' },
         { id: 'profile', label: 'Profile' },
     ];
@@ -106,7 +108,7 @@ function App() {
                         marginBottom: '16px',
                         letterSpacing: '-0.03em',
                     }}>
-                        Discover Projects
+                        {activeTab === 'matcher' ? 'AI Skill Matching' : 'Discover Projects'}
                     </h2>
                     <p style={{
                         fontSize: '1rem',
@@ -114,7 +116,10 @@ function App() {
                         marginBottom: '32px',
                         lineHeight: 1.7,
                     }}>
-                        Find freelance opportunities, trade equipment, and build your on-chain reputation at VIT Pune.
+                        {activeTab === 'matcher'
+                            ? 'Our AI analyzes your skills to find the perfect freelance opportunities for you.'
+                            : 'Find freelance opportunities, trade equipment, and build your on-chain reputation at VIT Pune.'
+                        }
                     </p>
 
                     {activeTab === 'feed' && (
@@ -153,6 +158,7 @@ function App() {
             {/* Main Content */}
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
                 {activeTab === 'feed' && <ProjectFeed />}
+                {activeTab === 'matcher' && <SkillMatcher />}
                 {activeTab === 'marketplace' && <Marketplace />}
                 {activeTab === 'profile' && <Profile />}
             </main>
