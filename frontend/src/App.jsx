@@ -5,16 +5,27 @@
 import { useState } from 'react';
 import { WalletConnect } from './components/wallet/WalletConnect';
 import { ProjectFeed } from './components/feed/ProjectFeed';
+import { CreateProjectModal } from './components/feed/CreateProjectModal';
+import { Marketplace } from './components/marketplace/Marketplace';
+import { Profile } from './components/profile/Profile';
+import { getCurrentNetwork } from './services/algorand';
 import './index.css';
 
 function App() {
     const [activeTab, setActiveTab] = useState('feed');
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     const tabs = [
         { id: 'feed', label: '🚀 Projects', icon: '💼' },
         { id: 'marketplace', label: '🛒 Marketplace', icon: '📦' },
         { id: 'profile', label: '👤 Profile', icon: '🎯' },
     ];
+
+    const handleCreateProject = async (projectData) => {
+        console.log('Creating project:', projectData);
+        // TODO: Call backend API and create escrow
+        alert('Project created! (Demo mode - backend integration pending)');
+    };
 
     return (
         <div className="min-h-screen bg-[#0f0f23]">
@@ -29,7 +40,7 @@ function App() {
                             </div>
                             <div>
                                 <h1 className="text-lg font-bold text-white">CampusNexus</h1>
-                                <p className="text-xs text-indigo-400">VIT Pune</p>
+                                <p className="text-xs text-indigo-400">VIT Pune • {getCurrentNetwork()}</p>
                             </div>
                         </div>
 
@@ -91,6 +102,16 @@ function App() {
                                 <p className="text-sm text-slate-500">ALGO Traded</p>
                             </div>
                         </div>
+
+                        {/* CTA Button */}
+                        {activeTab === 'feed' && (
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="mt-8 btn-primary text-lg px-8 py-3"
+                            >
+                                + Post a Project
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -98,22 +119,8 @@ function App() {
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {activeTab === 'feed' && <ProjectFeed />}
-
-                {activeTab === 'marketplace' && (
-                    <div className="text-center py-20">
-                        <span className="text-6xl">🛒</span>
-                        <h3 className="text-2xl font-bold text-white mt-4">P2P Marketplace</h3>
-                        <p className="text-slate-400 mt-2">Coming soon - Buy and sell Arduino kits, books, and more!</p>
-                    </div>
-                )}
-
-                {activeTab === 'profile' && (
-                    <div className="text-center py-20">
-                        <span className="text-6xl">🎯</span>
-                        <h3 className="text-2xl font-bold text-white mt-4">Your Hustle Score</h3>
-                        <p className="text-slate-400 mt-2">Connect your wallet to view your on-chain reputation</p>
-                    </div>
-                )}
+                {activeTab === 'marketplace' && <Marketplace />}
+                {activeTab === 'profile' && <Profile />}
             </main>
 
             {/* Footer */}
@@ -126,12 +133,27 @@ function App() {
                         <div className="flex items-center gap-4">
                             <span className="flex items-center gap-2 text-sm text-slate-400">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                TestNet
+                                {getCurrentNetwork()}
                             </span>
+                            <a
+                                href="https://github.com/adityagavane47/CampusNexus"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-400 hover:text-white transition-colors"
+                            >
+                                GitHub
+                            </a>
                         </div>
                     </div>
                 </div>
             </footer>
+
+            {/* Create Project Modal */}
+            <CreateProjectModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onSubmit={handleCreateProject}
+            />
         </div>
     );
 }
