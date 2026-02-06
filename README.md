@@ -1,8 +1,8 @@
-# CampusNexus
+# CampusNexus 🎓
 
-> 🎓 Decentralized LinkedIn & Marketplace for VIT Pune on Algorand Blockchain
+> Decentralized LinkedIn & Marketplace for VIT Pune on Algorand Blockchain
 
-## Features
+## 🚀 Features
 
 ### Track 1: Finance
 - **Milestone-Based Escrow** - Secure freelancing payments with milestone releases
@@ -12,7 +12,15 @@
 - **AI Skill-Matcher** - Match students with relevant opportunities
 - **Hustle Score (SBT)** - On-chain reputation via Soulbound Tokens
 
-## Tech Stack
+## 📱 Platforms
+
+| Platform | Status |
+|----------|--------|
+| Web | ✅ Ready |
+| Android | ✅ Ready (Capacitor) |
+| iOS | ✅ Ready (Capacitor) |
+
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -20,8 +28,9 @@
 | Frontend | React + Tailwind CSS |
 | Smart Contracts | Algorand Python (AlgoKit) |
 | Wallet | Pera Wallet |
+| Mobile | Capacitor |
 
-## Quick Start
+## 🏃 Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -37,7 +46,7 @@ uvicorn app.main:app --reload
 # API Docs: http://localhost:8000/docs
 ```
 
-### Frontend
+### Frontend (Web)
 ```bash
 cd frontend
 npm install
@@ -45,12 +54,29 @@ npm run dev
 # App: http://localhost:5173
 ```
 
-## Project Structure
-```
-├── backend/         # FastAPI backend
-├── frontend/        # React + Tailwind frontend
-└── contracts/       # Algorand Python smart contracts
+### Mobile App (Android)
+```bash
+cd frontend
+npm run build
+npx cap sync android
+npx cap open android
+# Build APK in Android Studio
 ```
 
-## License
+## 📁 Project Structure
+```
+├── backend/              # FastAPI backend
+├── frontend/             # React + Tailwind + Capacitor
+│   ├── android/          # Native Android project
+│   └── src/              # React source
+└── contracts/            # Algorand Python smart contracts
+    └── campus-contracts/
+```
+
+## 🔐 Smart Contracts
+
+- **MilestoneEscrow** - Freelancing milestone payments
+- **HustleScore** - Soulbound reputation token
+
+## 📄 License
 MIT
