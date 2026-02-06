@@ -83,4 +83,4 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 ---
 
 ## 👥 The Team
-- **Aditya Gavane** - [adityagavane47](https://github.com/adityagavane47)
+- **Aditya Gavane** - Backend $ Blockchain Architecture
