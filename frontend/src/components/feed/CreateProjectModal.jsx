@@ -1,164 +1,121 @@
 /**
- * CampusNexus - Create Project Modal
- * Form for creating new projects with escrow
+ * CampusNexus - Create Project Modal (Minimalist Design)
  */
 import { useState } from 'react';
 import { usePeraWallet } from '../../hooks/usePeraWallet';
 
 export function CreateProjectModal({ isOpen, onClose, onSubmit }) {
-    const { isConnected, accountAddress } = usePeraWallet();
+    const { isConnected } = usePeraWallet();
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        skills: '',
         budget: '',
-        deadline: '',
+        deadline: ''
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!isConnected) {
-            alert('Please connect your wallet first');
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        try {
-            await onSubmit({
-                ...formData,
-                skills_required: formData.skills.split(',').map(s => s.trim()),
-                budget_algo: parseFloat(formData.budget),
-                creator_address: accountAddress,
-            });
-            onClose();
-            setFormData({ title: '', description: '', skills: '', budget: '', deadline: '' });
-        } catch (error) {
-            console.error('Submit error:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            backdropFilter: 'blur(4px)'
+        }}>
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={onClose}
-            />
+                className="animate-fade-in"
+                style={{
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    width: '100%',
+                    maxWidth: '500px',
+                    padding: '32px',
+                    boxShadow: 'var(--shadow-lg)'
+                }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                    <h2 style={{ margin: 0 }}>Create Project</h2>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            fontSize: '1.5rem',
+                            cursor: 'pointer',
+                            color: 'var(--text-muted)'
+                        }}
+                    >
+                        ×
+                    </button>
+                </div>
 
-            {/* Modal */}
-            <div className="relative bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-lg mx-4 animate-fade-in">
-                <h2 className="text-2xl font-bold text-white mb-6">
-                    🚀 Create New Project
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Title */}
-                    <div>
-                        <label className="block text-sm text-slate-400 mb-1">Project Title</label>
+                <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }}>
+                    <div style={{ marginBottom: '16px' }}>
+                        <label>Project Title</label>
                         <input
                             type="text"
-                            name="title"
+                            placeholder="e.g. Redesign Landing Page"
                             value={formData.title}
-                            onChange={handleChange}
+                            onChange={e => setFormData({ ...formData, title: e.target.value })}
                             required
-                            placeholder="e.g., Build IoT Dashboard"
-                            className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                         />
                     </div>
 
-                    {/* Description */}
-                    <div>
-                        <label className="block text-sm text-slate-400 mb-1">Description</label>
+                    <div style={{ marginBottom: '16px' }}>
+                        <label>Description</label>
                         <textarea
-                            name="description"
+                            rows={4}
+                            placeholder="Describe the deliverables..."
                             value={formData.description}
-                            onChange={handleChange}
+                            onChange={e => setFormData({ ...formData, description: e.target.value })}
                             required
-                            rows={3}
-                            placeholder="Describe what you need..."
-                            className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
                         />
                     </div>
 
-                    {/* Skills */}
-                    <div>
-                        <label className="block text-sm text-slate-400 mb-1">Required Skills (comma-separated)</label>
-                        <input
-                            type="text"
-                            name="skills"
-                            value={formData.skills}
-                            onChange={handleChange}
-                            required
-                            placeholder="e.g., React, Python, Arduino"
-                            className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                        />
-                    </div>
-
-                    {/* Budget and Deadline */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid-2" style={{ marginBottom: '24px' }}>
                         <div>
-                            <label className="block text-sm text-slate-400 mb-1">Budget (ALGO)</label>
+                            <label>Budget (ALGO)</label>
                             <input
                                 type="number"
-                                name="budget"
+                                placeholder="500"
                                 value={formData.budget}
-                                onChange={handleChange}
+                                onChange={e => setFormData({ ...formData, budget: e.target.value })}
                                 required
-                                min="1"
-                                step="0.1"
-                                placeholder="50"
-                                className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm text-slate-400 mb-1">Deadline</label>
+                            <label>Deadline</label>
                             <input
                                 type="date"
-                                name="deadline"
                                 value={formData.deadline}
-                                onChange={handleChange}
+                                onChange={e => setFormData({ ...formData, deadline: e.target.value })}
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                             />
                         </div>
                     </div>
 
-                    {/* Wallet warning */}
-                    {!isConnected && (
-                        <div className="bg-amber-500/20 border border-amber-500/50 rounded-xl p-3 text-amber-400 text-sm">
-                            ⚠️ Connect your wallet to create a project with escrow
-                        </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-4">
+                    <div style={{ display: 'flex', gap: '12px' }}>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                            className="btn-secondary"
+                            style={{ flex: 1 }}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            disabled={isSubmitting || !isConnected}
-                            className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn-primary"
+                            style={{ flex: 1 }}
                         >
-                            {isSubmitting ? 'Creating...' : 'Create Project'}
+                            Post Project
                         </button>
                     </div>
                 </form>

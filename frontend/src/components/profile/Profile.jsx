@@ -1,131 +1,101 @@
 /**
- * CampusNexus - Profile Component
- * User profile with Hustle Score and stats
+ * CampusNexus - Profile Component (Minimalist Design)
  */
 import { useState, useEffect } from 'react';
 import { usePeraWallet } from '../../hooks/usePeraWallet';
-import { getAccountBalance, getCurrentNetwork } from '../../services/algorand';
+import { getAccountBalance } from '../../services/algorand';
 
 export function Profile() {
-    const { isConnected, accountAddress, truncateAddress } = usePeraWallet();
+    const { isConnected, accountAddress } = usePeraWallet();
     const [balance, setBalance] = useState(0);
-    const [hustleScore, setHustleScore] = useState(100); // Base score
-    const [stats, setStats] = useState({
-        projectsCompleted: 3,
-        endorsements: 7,
-        itemsSold: 2,
-    });
 
     useEffect(() => {
         if (isConnected && accountAddress) {
-            loadAccountInfo();
+            getAccountBalance(accountAddress).then(setBalance);
         }
     }, [isConnected, accountAddress]);
 
-    const loadAccountInfo = async () => {
-        try {
-            const bal = await getAccountBalance(accountAddress);
-            setBalance(bal);
-        } catch (err) {
-            console.error('Failed to load account info:', err);
-        }
-    };
-
     if (!isConnected) {
         return (
-            <div className="text-center py-20">
-                <span className="text-6xl">🔗</span>
-                <h3 className="text-2xl font-bold text-white mt-4">Connect Your Wallet</h3>
-                <p className="text-slate-400 mt-2">Connect your Pera Wallet to view your profile</p>
+            <div style={{
+                minHeight: '400px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+            }}>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '16px' }}>Sign in to view profile</h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                    Connect your Pera Wallet to access your dashboard.
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            {/* Profile Header */}
-            <div className="glass-card p-6">
-                <div className="flex items-center gap-6">
-                    {/* Avatar */}
-                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl">
-                        🎓
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-white">VIT Pune Student</h2>
-                        <p className="text-slate-400 font-mono mt-1">{accountAddress}</p>
-                        <div className="flex items-center gap-4 mt-3">
-                            <span className="flex items-center gap-1 text-sm text-slate-400">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                {getCurrentNetwork()}
-                            </span>
-                            <span className="text-emerald-400 font-semibold">
-                                {balance.toFixed(2)} ALGO
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Hustle Score */}
-                    <div className="text-center">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                            <span className="text-3xl font-bold text-white">{hustleScore}</span>
-                        </div>
-                        <p className="text-sm text-slate-400 mt-2">Hustle Score</p>
-                    </div>
+        <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            {/* Header */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '24px',
+                marginBottom: '48px'
+            }}>
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--bg-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '2rem'
+                }}>
+                    👤
+                </div>
+                <div>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>My Account</h2>
+                    <p style={{ fontFamily: 'monospace', color: 'var(--text-secondary)' }}>
+                        {accountAddress}
+                    </p>
                 </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="glass-card p-5 text-center">
-                    <p className="text-3xl font-bold text-indigo-400">{stats.projectsCompleted}</p>
-                    <p className="text-slate-400 text-sm mt-1">Projects Completed</p>
+            <div className="grid-3" style={{ marginBottom: '48px' }}>
+                <div className="card-minimal" style={{ backgroundColor: 'var(--bg-secondary)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '2rem', fontWeight: 600 }}>{balance.toFixed(1)}</p>
+                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>ALGO Balance</p>
                 </div>
-                <div className="glass-card p-5 text-center">
-                    <p className="text-3xl font-bold text-purple-400">{stats.endorsements}</p>
-                    <p className="text-slate-400 text-sm mt-1">Endorsements</p>
+                <div className="card-minimal" style={{ backgroundColor: 'var(--bg-secondary)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '2rem', fontWeight: 600 }}>100</p>
+                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Hustle Score</p>
                 </div>
-                <div className="glass-card p-5 text-center">
-                    <p className="text-3xl font-bold text-emerald-400">{stats.itemsSold}</p>
-                    <p className="text-slate-400 text-sm mt-1">Items Sold</p>
-                </div>
-            </div>
-
-            {/* Skills Section */}
-            <div className="glass-card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">🎯 Verified Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                    {['React', 'Python', 'Arduino', 'Machine Learning', 'FastAPI', 'Solidity'].map(skill => (
-                        <span
-                            key={skill}
-                            className="px-4 py-2 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30"
-                        >
-                            {skill}
-                        </span>
-                    ))}
+                <div className="card-minimal" style={{ backgroundColor: 'var(--bg-secondary)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '2rem', fontWeight: 600 }}>5★</p>
+                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Rating</p>
                 </div>
             </div>
 
-            {/* Recent Activity */}
-            <div className="glass-card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">📋 Recent Activity</h3>
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-sm">
-                        <span className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">✅</span>
-                        <span className="text-slate-300">Completed "IoT Dashboard" project</span>
-                        <span className="text-slate-500 ml-auto">2 days ago</span>
+            {/* Sections */}
+            <div className="grid-2">
+                <div className="card">
+                    <div className="section-header">
+                        <h3 className="section-title" style={{ fontSize: '1rem' }}>Active Projects</h3>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                        <span className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">👍</span>
-                        <span className="text-slate-300">Received endorsement for Python</span>
-                        <span className="text-slate-500 ml-auto">5 days ago</span>
+                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>
+                        No active projects
+                    </p>
+                </div>
+
+                <div className="card">
+                    <div className="section-header">
+                        <h3 className="section-title" style={{ fontSize: '1rem' }}>Purchase History</h3>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                        <span className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">🛒</span>
-                        <span className="text-slate-300">Sold Arduino Kit for 15 ALGO</span>
-                        <span className="text-slate-500 ml-auto">1 week ago</span>
-                    </div>
+                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>
+                        No recent purchases
+                    </p>
                 </div>
             </div>
         </div>
