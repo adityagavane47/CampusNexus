@@ -1,0 +1,19 @@
+{
+  "users": [
+    {
+      "id": "gavaneaditya787@gmail.com",
+      "email": "gavaneaditya787@gmail.com",
+      "name": "Aditya Gavane",
+      "avatar": "https://lh3.googleusercontent.com/a/ACg8ocInz7MB4Te0t2mR6OQ7InO0Mz82MoGOhIa62TOr99NgJ9FVVz5i=s96-c",
+      "wallet_address": null,
+      "oauth_provider": "google",
+      "oauth_id": "109297067062087539663",
+      "created_at": "2026-02-07 13:37:10.195513",
+      "last_login": "2026-02-07T13:47:22.239029",
+      "college": "VIT Pune",
+      "age": 19,
+      "year": "1st Year",
+      "branch": "Information Technology"
+    }
+  ]
+}

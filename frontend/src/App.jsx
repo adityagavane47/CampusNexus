@@ -9,12 +9,46 @@ import { CreateProjectModal } from './components/feed/CreateProjectModal';
 import { Marketplace } from './components/marketplace/Marketplace';
 import { Profile } from './components/profile/Profile';
 import { SkillMatcher } from './components/feed/SkillMatcher';
+import { LoginPage } from './components/auth/LoginPage';
+import { OnboardingPage } from './components/auth/OnboardingPage';
+import { useAuth } from './hooks/useAuth';
 import { getCurrentNetwork } from './services/algorand';
 import './index.css';
 
 function App() {
     const [activeTab, setActiveTab] = useState('feed');
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const { user, loading, isAuthenticated, logout } = useAuth();
+
+    // Check if user wants to skip login and use wallet directly
+    const urlParams = new URLSearchParams(window.location.search);
+    const skipLogin = urlParams.get('skip_login') === 'true';
+
+    // Show login page if not authenticated and not skipping
+    if (!isAuthenticated && !skipLogin && !loading) {
+        return <LoginPage />;
+    }
+
+    if (loading) {
+        return (
+            <div style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'var(--bg-primary)'
+            }}>
+                <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+            </div>
+        );
+    }
+
+    // Check if user needs to complete profile
+    const isProfileComplete = user?.age && user?.year && user?.branch;
+
+    if (isAuthenticated && !skipLogin && !isProfileComplete) {
+        return <OnboardingPage onComplete={() => window.location.reload()} />;
+    }
 
     const tabs = [
         { id: 'feed', label: 'Discover' },
@@ -89,8 +123,32 @@ function App() {
                         ))}
                     </div>
 
-                    {/* Wallet Connect */}
-                    <WalletConnect />
+                    {/* User Info / Wallet Connect */}
+                    {isAuthenticated && user ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                {user.email}
+                            </span>
+                            <button
+                                onClick={logout}
+                                style={{
+                                    padding: '8px 16px',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    border: '1px solid var(--border-light)',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    backgroundColor: 'transparent',
+                                    color: 'var(--text-primary)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <WalletConnect />
+                    )}
                 </div>
             </nav>
 

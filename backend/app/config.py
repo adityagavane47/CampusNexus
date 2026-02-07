@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     
+    # OAuth Configuration
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    github_client_id: str = ""
+    github_client_secret: str = ""
+    
+    # OAuth Redirect URIs
+    oauth_redirect_uri: str = "http://localhost:8000/api/oauth"
+    frontend_url: str = "http://localhost:5173"
+    
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]

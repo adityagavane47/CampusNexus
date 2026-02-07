@@ -3,10 +3,12 @@
  */
 import { useState, useEffect } from 'react';
 import { usePeraWallet } from '../../hooks/usePeraWallet';
+import { useAuth } from '../../hooks/useAuth';
 import { getAccountBalance } from '../../services/algorand';
 
 export function Profile() {
     const { isConnected, accountAddress } = usePeraWallet();
+    const { user } = useAuth();
     const [balance, setBalance] = useState(0);
 
     useEffect(() => {
@@ -15,20 +17,16 @@ export function Profile() {
         }
     }, [isConnected, accountAddress]);
 
-    if (!isConnected) {
+    if (!isConnected && !user) {
         return (
             <div style={{
                 minHeight: '400px',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center',
             }}>
                 <h2 style={{ fontSize: '1.5rem', marginBottom: '16px' }}>Sign in to view profile</h2>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                    Connect your Pera Wallet to access your dashboard.
-                </p>
             </div>
         );
     }
@@ -40,25 +38,34 @@ export function Profile() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '24px',
-                marginBottom: '48px'
+                marginBottom: '48px',
+                padding: '24px',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '16px'
             }}>
                 <div style={{
                     width: '80px',
                     height: '80px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundColor: 'var(--accent-primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '2rem'
+                    fontSize: '2rem',
+                    color: 'white'
                 }}>
-                    👤
+                    {user?.avatar ? <img src={user.avatar} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : '👤'}
                 </div>
                 <div>
-                    <h2 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>My Account</h2>
-                    <p style={{ fontFamily: 'monospace', color: 'var(--text-secondary)' }}>
-                        {accountAddress}
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{user?.name || "Anonymous User"}</h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                        {user?.branch ? `${user.branch} • ${user.year}` : user?.college}
                     </p>
+                    {accountAddress && (
+                        <p style={{ fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                            {accountAddress.slice(0, 6)}...{accountAddress.slice(-6)}
+                        </p>
+                    )}
                 </div>
             </div>
 

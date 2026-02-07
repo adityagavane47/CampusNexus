@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import auth, feed, escrow, marketplace, ai
+from app.routers import auth, feed, escrow, marketplace, ai, oauth
 
 settings = get_settings()
 
@@ -27,8 +27,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Session Middleware (Required for OAuth)
+from starlette.middleware.sessions import SessionMiddleware
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.jwt_secret_key,
+    https_only=False  # Set to True in production with HTTPS
+)
+
 # Include Routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(oauth.router, prefix="/api/oauth", tags=["OAuth"])
 app.include_router(feed.router, prefix="/api/feed", tags=["Project Feed"])
 app.include_router(escrow.router, prefix="/api/escrow", tags=["Escrow"])
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace"])
