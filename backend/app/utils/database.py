@@ -129,3 +129,124 @@ def get_all_users() -> List[User]:
     """Get all users (for admin purposes)."""
     users = load_users()
     return [User(**user_data) for user_data in users]
+
+
+# ===== PROJECT DATABASE FUNCTIONS =====
+
+# Project database file path
+PROJECTS_DB_FILE = Path(__file__).parent.parent.parent / "data" / "projects.json"
+
+
+def ensure_projects_db_exists():
+    """Ensure the projects database file exists."""
+    PROJECTS_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if not PROJECTS_DB_FILE.exists():
+        PROJECTS_DB_FILE.write_text(json.dumps({"projects": []}))
+
+
+def load_projects() -> List[Dict]:
+    """Load all projects from the database."""
+    ensure_projects_db_exists()
+    with open(PROJECTS_DB_FILE, 'r') as f:
+        data = json.load(f)
+    return data.get("projects", [])
+
+
+def save_projects(projects: List[Dict]):
+    """Save all projects to the database."""
+    ensure_projects_db_exists()
+    with open(PROJECTS_DB_FILE, 'w') as f:
+        json.dump({"projects": projects}, f, indent=2, default=str)
+
+
+def create_project(project_data: Dict) -> Dict:
+    """Create a new project."""
+    projects = load_projects()
+    
+    # Generate project ID
+    project_id = len(projects) + 1
+    
+    # Get creator details from users database
+    creator = None
+    users = load_users()
+    for user_data in users:
+        if user_data.get("id") == project_data.get("creator_id"):
+            creator = user_data
+            break
+    
+    new_project = {
+        "id": project_id,
+        "title": project_data.get("title"),
+        "description": project_data.get("description"),
+        "skills_required": project_data.get("skills_required", []),
+        "budget_algo": project_data.get("budget_algo"),
+        "deadline": project_data.get("deadline"),
+        "milestones": project_data.get("milestones", []),
+        "creator_id": project_data.get("creator_id"),
+        "creator_name": creator.get("name") if creator else "Unknown",
+        "creator_avatar": creator.get("profile_picture") or creator.get("avatar") if creator else None,
+        "status": "open",
+        "created_at": datetime.utcnow().isoformat(),
+        "applications": []
+    }
+    
+    projects.append(new_project)
+    save_projects(projects)
+    
+    return new_project
+
+
+def get_all_projects() -> List[Dict]:
+    """Get all projects."""
+    return load_projects()
+
+
+def get_project_by_id(project_id: int) -> Optional[Dict]:
+    """Get a specific project by ID."""
+    projects = load_projects()
+    for project in projects:
+        if project.get("id") == project_id:
+            return project
+    return None
+
+
+def apply_to_project(project_id: int, applicant_id: str) -> Optional[Dict]:
+    """Apply to a project."""
+    projects = load_projects()
+    
+    # Get applicant details
+    applicant = None
+    users = load_users()
+    for user_data in users:
+        if user_data.get("id") == applicant_id:
+            applicant = user_data
+            break
+    
+    if not applicant:
+        return None
+    
+    for i, project in enumerate(projects):
+        if project.get("id") == project_id:
+            # Check if already applied
+            for app in project.get("applications", []):
+                if app.get("user_id") == applicant_id:
+                    return project  # Already applied
+            
+            # Add application
+            application = {
+                "user_id": applicant_id,
+                "user_name": applicant.get("name", "Unknown"),
+                "user_avatar": applicant.get("profile_picture") or applicant.get("avatar"),
+                "applied_at": datetime.utcnow().isoformat()
+            }
+            
+            if "applications" not in project:
+                project["applications"] = []
+            
+            project["applications"].append(application)
+            projects[i] = project
+            save_projects(projects)
+            return project
+    
+    return None
+

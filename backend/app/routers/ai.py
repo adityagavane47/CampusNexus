@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from typing import List
 
 from app.services.ai_matching import rank_projects
-# Import the in-memory db from feed router (in a real app, uses a shared DB service)
-from app.routers.feed import projects_db
+# Import database function instead of in-memory variable
+from app.utils.database import get_all_projects
 
 router = APIRouter(
     prefix="/ai",
@@ -32,8 +32,10 @@ async def match_projects(request: MatchRequest):
     """
     if not request.skills:
         raise HTTPException(status_code=400, detail="Skills list cannot be empty")
-        
-    ranked_projects = rank_projects(request.skills, projects_db)
+    
+    # Fetch projects from database
+    projects = get_all_projects()
+    ranked_projects = rank_projects(request.skills, projects)
     
     # Format response
     results = [

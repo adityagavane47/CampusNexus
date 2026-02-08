@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from jose import jwt
+from pydantic import BaseModel
 
 from app.config import get_settings
 from app.models.user import UserCreate, UserResponse, OAuthUserInfo, UserUpdate
@@ -241,3 +242,36 @@ async def update_profile(user_id: str, profile: UserUpdate):
         raise HTTPException(status_code=404, detail="User not found")
     
     return UserResponse(**updated_user.model_dump())
+
+
+class ProfilePictureUpload(BaseModel):
+    """Model for profile picture upload."""
+    user_id: str
+    image_data: str  # Base64 encoded image
+
+
+@router.post("/upload-profile-picture")
+async def upload_profile_picture(upload: ProfilePictureUpload):
+    """
+    Upload profile picture (Base64 encoded).
+    In production, this should upload to cloud storage and return URL.
+    """
+    try:
+        # For now, we'll store the Base64 string directly
+        # In production, decode and upload to S3/Cloudinary
+        
+        updated_user = update_user_profile(
+            upload.user_id, 
+            {"profile_picture": upload.image_data}
+        )
+        
+        if not updated_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {
+            "success": True,
+            "profile_picture": upload.image_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+

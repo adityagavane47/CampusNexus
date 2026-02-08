@@ -3,26 +3,29 @@ CampusNexus - Project Feed Router
 Endpoints for student project/gig opportunities
 """
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
+from app.utils.database import (
+    create_project,
+    get_all_projects,
+    get_project_by_id,
+    apply_to_project
+)
+
 router = APIRouter()
-
-
-# In-memory store (replace with database in production)
-projects_db: list[dict] = []
 
 
 class ProjectCreate(BaseModel):
     """Request model for creating a project."""
     title: str
     description: str
-    skills_required: list[str]
+    skills_required: List[str]
     budget_algo: float
     deadline: str
-    milestones: list[str]
-    creator_address: str
+    milestones: List[str]
+    creator_id: str  # User ID from OAuth
 
 
 class ProjectResponse(BaseModel):
@@ -30,17 +33,24 @@ class ProjectResponse(BaseModel):
     id: int
     title: str
     description: str
-    skills_required: list[str]
+    skills_required: List[str]
     budget_algo: float
     deadline: str
-    milestones: list[str]
-    creator_address: str
+    milestones: List[str]
+    creator_id: str
+    creator_name: str
+    creator_avatar: Optional[str]
     status: str
     created_at: str
-    applications_count: int
+    applications: List[dict]
 
 
-@router.get("/", response_model=list[ProjectResponse])
+class ApplicationRequest(BaseModel):
+    """Request model for applying to a project."""
+    applicant_id: str
+
+
+@router.get("/", response_model=List[ProjectResponse])
 async def list_projects(
     skill: Optional[str] = Query(None, description="Filter by skill"),
     min_budget: Optional[float] = Query(None, description="Minimum budget in ALGO"),
@@ -50,54 +60,52 @@ async def list_projects(
     List all available projects/gigs.
     Supports filtering by skill, budget, and status.
     """
-    filtered = projects_db
+    projects = get_all_projects()
+    filtered = projects
     
     if skill:
-        filtered = [p for p in filtered if skill.lower() in [s.lower() for s in p["skills_required"]]]
+        filtered = [p for p in filtered if skill.lower() in [s.lower() for s in p.get("skills_required", [])]]
     
     if min_budget:
-        filtered = [p for p in filtered if p["budget_algo"] >= min_budget]
+        filtered = [p for p in filtered if p.get("budget_algo", 0) >= min_budget]
     
     if status:
-        filtered = [p for p in filtered if p["status"] == status]
+        filtered = [p for p in filtered if p.get("status") == status]
     
     return filtered
 
 
 @router.post("/", response_model=ProjectResponse)
-async def create_project(project: ProjectCreate):
+async def create_new_project(project: ProjectCreate):
     """
     Create a new project/gig opportunity.
     """
-    new_project = {
-        "id": len(projects_db) + 1,
-        **project.model_dump(),
-        "status": "open",
-        "created_at": datetime.utcnow().isoformat(),
-        "applications_count": 0,
-    }
-    
-    projects_db.append(new_project)
-    
+    new_project = create_project(project.model_dump())
     return new_project
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def get_project(project_id: int):
     """Get a specific project by ID."""
-    for project in projects_db:
-        if project["id"] == project_id:
-            return project
+    project = get_project_by_id(project_id)
     
-    raise HTTPException(status_code=404, detail="Project not found")
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    return project
 
 
 @router.post("/{project_id}/apply")
-async def apply_to_project(project_id: int, applicant_address: str):
+async def apply_to_project_endpoint(project_id: int, request: ApplicationRequest):
     """Apply to a project as a freelancer."""
-    for project in projects_db:
-        if project["id"] == project_id:
-            project["applications_count"] += 1
-            return {"message": "Application submitted", "project_id": project_id}
+    project = apply_to_project(project_id, request.applicant_id)
     
-    raise HTTPException(status_code=404, detail="Project not found")
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found or user not found")
+    
+    return {
+        "message": "Application submitted successfully",
+        "project_id": project_id,
+        "applications_count": len(project.get("applications", []))
+    }
+

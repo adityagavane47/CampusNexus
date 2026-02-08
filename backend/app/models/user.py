@@ -3,7 +3,7 @@ CampusNexus - User Model
 OAuth and Wallet-based user management
 """
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 
 
@@ -28,6 +28,11 @@ class User(BaseModel):
     age: Optional[int] = None
     year: Optional[str] = None
     branch: Optional[str] = None
+    
+    # Profile enhancements
+    skills: Optional[List[str]] = None
+    profile_picture: Optional[str] = None  # Base64 or URL
+    bio: Optional[str] = None  # About me section
 
 
 class UserCreate(BaseModel):
@@ -46,6 +51,9 @@ class UserUpdate(BaseModel):
     age: Optional[int] = None
     year: Optional[str] = None
     branch: Optional[str] = None
+    skills: Optional[List[str]] = None
+    profile_picture: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class UserResponse(BaseModel):
@@ -60,6 +68,9 @@ class UserResponse(BaseModel):
     age: Optional[int] = None
     year: Optional[str] = None
     branch: Optional[str] = None
+    skills: Optional[List[str]] = None
+    profile_picture: Optional[str] = None
+    bio: Optional[str] = None
     created_at: datetime
 
 
