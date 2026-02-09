@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { usePeraWallet } from '../../hooks/usePeraWallet';
 import { useAuth } from '../../hooks/useAuth';
 import { getAccountBalance } from '../../services/algorand';
+import { projectsService } from '../../services/projects';
 
 export function Profile() {
     const { isConnected, accountAddress } = usePeraWallet();
@@ -14,12 +15,32 @@ export function Profile() {
     const [editedName, setEditedName] = useState('');
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editedBio, setEditedBio] = useState('');
+    const [myProjects, setMyProjects] = useState([]);
+    const [loadingProjects, setLoadingProjects] = useState(false);
 
     useEffect(() => {
         if (isConnected && accountAddress) {
             getAccountBalance(accountAddress).then(setBalance);
         }
     }, [isConnected, accountAddress]);
+
+    useEffect(() => {
+        if (user?.id) {
+            loadMyProjects();
+        }
+    }, [user]);
+
+    const loadMyProjects = async () => {
+        try {
+            setLoadingProjects(true);
+            const projects = await projectsService.getProjects({ creator_id: user.id, status: null });
+            setMyProjects(projects);
+        } catch (error) {
+            console.error('Failed to load projects:', error);
+        } finally {
+            setLoadingProjects(false);
+        }
+    };
 
     const handleSaveName = async () => {
         if (!editedName.trim()) {
@@ -251,11 +272,58 @@ export function Profile() {
             <div className="grid-2">
                 <div className="card">
                     <div className="section-header">
-                        <h3 className="section-title" style={{ fontSize: '1rem' }}>Active Projects</h3>
+                        <h3 className="section-title" style={{ fontSize: '1rem' }}>My Projects</h3>
                     </div>
-                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>
-                        No active projects
-                    </p>
+                    {loadingProjects ? (
+                        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>
+                            Loading...
+                        </p>
+                    ) : myProjects.length === 0 ? (
+                        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>
+                            No projects created yet
+                        </p>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {myProjects.map(project => (
+                                <div
+                                    key={project.id}
+                                    style={{
+                                        padding: '16px',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'var(--bg-secondary)',
+                                        border: '1px solid var(--border-light)',
+                                        transition: 'transform 0.2s',
+                                        cursor: 'pointer'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(4px)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600 }}>{project.title}</h4>
+                                        <span
+                                            style={{
+                                                padding: '4px 8px',
+                                                borderRadius: '12px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 500,
+                                                backgroundColor: project.status === 'open' ? '#e8f5e9' : '#f5f5f5',
+                                                color: project.status === 'open' ? '#2e7d32' : '#757575'
+                                            }}
+                                        >
+                                            {project.status}
+                                        </span>
+                                    </div>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.5 }}>
+                                        {project.description}
+                                    </p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        <span>💰 {project.budget_algo} ALGO</span>
+                                        <span>📝 {project.applications?.length || 0} applications</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="card">

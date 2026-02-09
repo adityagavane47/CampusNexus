@@ -16,6 +16,7 @@ export const projectsService = {
             if (filters.skill) params.append('skill', filters.skill);
             if (filters.min_budget) params.append('min_budget', filters.min_budget);
             if (filters.status) params.append('status', filters.status);
+            if (filters.creator_id) params.append('creator_id', filters.creator_id);
 
             const queryString = params.toString();
             const url = `${API_BASE_URL}/feed${queryString ? `?${queryString}` : ''}`;

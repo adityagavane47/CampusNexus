@@ -54,11 +54,12 @@ class ApplicationRequest(BaseModel):
 async def list_projects(
     skill: Optional[str] = Query(None, description="Filter by skill"),
     min_budget: Optional[float] = Query(None, description="Minimum budget in ALGO"),
-    status: Optional[str] = Query("open", description="Project status")
+    status: Optional[str] = Query("open", description="Project status"),
+    creator_id: Optional[str] = Query(None, description="Filter by creator ID")
 ):
     """
     List all available projects/gigs.
-    Supports filtering by skill, budget, and status.
+    Supports filtering by skill, budget, status, and creator.
     """
     projects = get_all_projects()
     filtered = projects
@@ -71,6 +72,9 @@ async def list_projects(
     
     if status:
         filtered = [p for p in filtered if p.get("status") == status]
+    
+    if creator_id:
+        filtered = [p for p in filtered if p.get("creator_id") == creator_id]
     
     return filtered
 
