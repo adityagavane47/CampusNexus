@@ -8,6 +8,12 @@ from app.config import get_settings
 
 settings = get_settings()
 
+# Deployed Smart Contract App IDs (Testnet)
+CONTRACT_IDS = {
+    "MILESTONE_ESCROW": 755290899,
+    "HUSTLE_SCORE": 755290900,
+}
+
 
 def get_algod_client() -> algod.AlgodClient:
     """Get Algorand Algod client."""

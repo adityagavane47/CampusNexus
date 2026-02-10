@@ -228,7 +228,7 @@ function App() {
                 textAlign: 'center',
             }}>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                    CampusNexus © 2024 · Built on Algorand
+                    CampusNexus @ MADE BY TEAM AMATEUR
                 </p>
             </footer>
 

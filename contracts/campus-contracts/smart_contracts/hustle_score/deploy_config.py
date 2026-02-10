@@ -1,39 +1,40 @@
 import logging
-
-from smart_contracts.hustle_score.contract import HustleScore
+import os
+from algokit_utils import AlgorandClient
+from smart_contracts.artifacts.hustle_score.hustle_score_client import APP_SPEC
 
 logger = logging.getLogger(__name__)
 
 
 def deploy() -> None:
     """Deploy the HustleScore SBT contract."""
-    from algokit_utils import (
-        OnSchemaBreak,
-        OnUpdate,
-        get_algod_client,
-    )
-    from algokit_utils.applications.app_client import AppClient
-    from algokit_utils.config import config
     
-    config.configure(populate_app_call_resources=True)
-    
-    algod_client = get_algod_client()
+    # Use environment variables for connection
+    algorand = AlgorandClient.from_environment()
 
-    app_client = AppClient.from_client_and_contract(
-        algod_client=algod_client,
-        contract=HustleScore(),
-        creator=get_localnet_default_account(algod_client),
+    # Get deployer account
+    mnemonic_phrase = os.getenv("DEPLOYER_MNEMONIC")
+    if mnemonic_phrase:
+        deployer = algorand.account.from_mnemonic(mnemonic=mnemonic_phrase)
+        logger.info(f"Deploying with account: {deployer.address}")
+    else:
+        deployer = algorand.account.localnet_dispenser()
+        logger.info(f"Deploying with Localnet dispenser: {deployer.address}")
+
+    # Create App Factory
+    factory = algorand.client.get_app_factory(
+        app_spec=APP_SPEC,
+        app_name="HustleScore",
+        default_sender=deployer.address,
+        default_signer=deployer.signer,
     )
 
-    app_client.deploy(
-        on_schema_break=OnSchemaBreak.AppendApp,
-        on_update=OnUpdate.AppendApp,
-    )
+    # Deploy using create (simpler, avoids network lookup)
+    app = factory.create()
 
-    logger.info(f"Deployed HustleScore with app_id: {app_client.app_id}")
+    logger.info(f"Deployed HustleScore with app_id: {app.app_id}")
 
 
 def get_localnet_default_account(algod_client):
-    """Get the default localnet account."""
-    from algokit_utils import get_localnet_default_account as get_default
-    return get_default(algod_client)
+    """Deprecated helper."""
+    pass

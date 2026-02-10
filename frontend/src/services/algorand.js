@@ -32,10 +32,10 @@ const NETWORKS = {
 // Current network - change this for deployment
 const CURRENT_NETWORK = 'testnet';
 
-// Contract App IDs (update after deployment)
+// Contract App IDs - Deployed on Testnet (2026-02-10)
 export const CONTRACT_IDS = {
-    escrow: 0,        // Update with deployed App ID
-    hustleScore: 0,   // Update with deployed App ID
+    escrow: 755290899,        // MilestoneEscrow App ID
+    hustleScore: 755290900,   // HustleScore App ID
 };
 
 /**

@@ -129,34 +129,9 @@ export function LoginPage() {
                     </button>
                 </div>
 
-                {/* Footer */}
-                <div className="login-footer">
-                    <p>
-                        By continuing, you agree to our{' '}
-                        <a href="#">Terms of Service</a> and{' '}
-                        <a href="#">Privacy Policy</a>
-                    </p>
-                </div>
             </div>
 
-            {/* Features Section */}
-            <div className="login-features">
-                <div className="feature-item">
-                    <div className="feature-icon">💼</div>
-                    <h3>Find Projects</h3>
-                    <p>Discover freelance opportunities on campus</p>
-                </div>
-                <div className="feature-item">
-                    <div className="feature-icon">🤝</div>
-                    <h3>Build Reputation</h3>
-                    <p>Earn on-chain credentials and trust</p>
-                </div>
-                <div className="feature-item">
-                    <div className="feature-icon">🛍️</div>
-                    <h3>Trade Equipment</h3>
-                    <p>Buy and sell campus resources safely</p>
-                </div>
-            </div>
+
         </div>
     );
 }
