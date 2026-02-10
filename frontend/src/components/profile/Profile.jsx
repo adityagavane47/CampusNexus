@@ -8,7 +8,7 @@ import { getAccountBalance } from '../../services/algorand';
 import { projectsService } from '../../services/projects';
 
 export function Profile() {
-    const { isConnected, accountAddress } = usePeraWallet();
+    const { isConnected, accountAddress, connect } = usePeraWallet();
     const { user } = useAuth();
     const [balance, setBalance] = useState(0);
     const [isEditingName, setIsEditingName] = useState(false);
@@ -165,10 +165,54 @@ export function Profile() {
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>
                         {user?.branch ? `${user.branch} • ${user.year}` : user?.college}
                     </p>
-                    {accountAddress && (
+
+                    {/* Wallet Connection Logic */}
+                    {user?.wallet_address || accountAddress ? (
                         <p style={{ fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                            {accountAddress.slice(0, 6)}...{accountAddress.slice(-6)}
+                            {(user?.wallet_address || accountAddress).slice(0, 6)}...{(user?.wallet_address || accountAddress).slice(-6)}
+                            {accountAddress && user?.wallet_address && accountAddress !== user.wallet_address && (
+                                <span style={{ marginLeft: '8px', color: '#ff9800', fontSize: '0.75rem' }}>
+                                    (Wallet mismatch)
+                                </span>
+                            )}
                         </p>
+                    ) : (
+                        <div style={{ marginTop: '8px' }}>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        if (connect) {
+                                            const newAddress = await connect();
+                                            if (newAddress) {
+                                                // Link wallet to account
+                                                const { authService } = await import('../../services/auth');
+                                                await authService.updateProfile(user.id, { wallet_address: newAddress });
+                                                // Force reload to update user state
+                                                window.location.reload();
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        alert('Failed to connect wallet');
+                                    }
+                                }}
+                                style={{
+                                    backgroundColor: '#ffeee5', // Pera yellow-ish
+                                    color: '#b06000',
+                                    border: '1px solid #ffd0b0',
+                                    padding: '6px 12px',
+                                    borderRadius: '20px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                🔗 Connect Pera Wallet
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

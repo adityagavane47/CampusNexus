@@ -4,6 +4,7 @@
  */
 import { useState } from 'react';
 import { WalletConnect } from './components/wallet/WalletConnect';
+import { NotificationBell } from './components/layout/NotificationBell';
 import { ProjectFeed } from './components/feed/ProjectFeed';
 import { CreateProjectModal } from './components/feed/CreateProjectModal';
 import { Marketplace } from './components/marketplace/Marketplace';
@@ -126,6 +127,7 @@ function App() {
                     {/* User Info / Wallet Connect */}
                     {isAuthenticated && user ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <NotificationBell />
                             <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                 {user.email}
                             </span>

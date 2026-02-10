@@ -10,6 +10,13 @@ from jose import jwt
 from app.config import get_settings
 from app.services.algorand import verify_wallet_signature, get_account_info
 
+from app.utils.database import (
+    find_user_by_wallet,
+    create_user,
+    update_user_login,
+    UserCreate
+)
+
 router = APIRouter()
 settings = get_settings()
 
@@ -70,9 +77,27 @@ async def verify_wallet(request: WalletConnectRequest):
     if "error" in account_info:
         raise HTTPException(status_code=400, detail="Invalid Algorand address")
     
+    
     # Create JWT token
     expires_delta = timedelta(minutes=settings.jwt_expire_minutes)
     expire = datetime.utcnow() + expires_delta
+    
+    # Ensure user exists in database
+    user = find_user_by_wallet(request.address)
+    if not user:
+        # Create new user
+        user_create = UserCreate(
+            wallet_address=request.address,
+            name=f"Wallet User {request.address[:4]}...{request.address[-4:]}",
+            email=None,
+            avatar=None,
+            oauth_provider="algorand",
+            oauth_id=request.address
+        )
+        create_user(user_create)
+    else:
+        # Update last login
+        update_user_login(user.id)
     
     payload = {
         "sub": request.address,

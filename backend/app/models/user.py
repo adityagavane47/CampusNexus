@@ -54,6 +54,7 @@ class UserUpdate(BaseModel):
     skills: Optional[List[str]] = None
     profile_picture: Optional[str] = None
     bio: Optional[str] = None
+    wallet_address: Optional[str] = None
 
 
 class UserResponse(BaseModel):

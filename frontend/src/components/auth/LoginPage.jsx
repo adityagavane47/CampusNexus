@@ -114,20 +114,7 @@ export function LoginPage() {
                     />
                 </div>
 
-                {/* Divider */}
-                <div className="login-divider">
-                    <span>or</span>
-                </div>
 
-                {/* Wallet Option */}
-                <div className="wallet-option">
-                    <p className="wallet-text">
-                        Already have an Algorand wallet?
-                    </p>
-                    <button className="wallet-link" onClick={() => window.location.href = '/?skip_login=true'}>
-                        Connect with Pera Wallet →
-                    </button>
-                </div>
 
             </div>
 
