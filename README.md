@@ -9,14 +9,14 @@
 ## ✨ Key Features
 
 ### 🏦 Track 1: Future of Finance (Blockchain)
-- **Milestone-Based Escrow**: Secure peer-to-peer student freelancing. Payments are locked in smart contracts and released only when work is delivered.
+- **[Milestone-Based Escrow](contracts/campus-contracts/smart_contracts/escrow/contract.py)**: Secure peer-to-peer student freelancing. Payments are locked in smart contracts and released only when work is delivered.
 - **P2P Marketplace**: Buy and sell used Arduino kits, sensors, and textbooks safely using ALGO.
 - **Micro-Equity Tokens**: Team leads can issue ASAs (Algorand Standard Assets) to teammates to represent shares in a project’s future success.
 
 ### 🤖 Track 2: AI & Automation
-- **AI Skill-Matcher**: A smart backend that matches student profiles with project needs using NLP.
-- **Hustle-Score**: A verifiable reputation system. Earn Soulbound Tokens (SBTs) for successful collaborations, verified by AI feedback analysis.
-- **Automated Verification**: AI scans marketplace listings to verify item condition and suggest fair pricing.
+- **[AI Skill-Matcher](backend/app/services/ai_matching.py)**: A smart backend that matches student profiles with project needs using NLP.
+- **[Hustle-Score](contracts/campus-contracts/smart_contracts/hustle_score/contract.py)**: A verifiable reputation system. Earn Soulbound Tokens (SBTs) for successful collaborations, verified by AI feedback analysis.
+- **[Automated Verification](backend/app/routers/ai.py)**: AI scans marketplace listings to verify item condition and suggest fair pricing.
 
 ---
 
@@ -34,7 +34,7 @@
 
 ## 🏗️ Architecture
 
-![CampusNexus Workflow](Freelance Marketplace Flow-2026-02-06-202733.png)
+![CampusNexus Workflow](Freelance%20Marketplace%20Flow-2026-02-06-202733.png)
 
 - **Frontend**: React components for the Project Feed, Marketplace, and Profile.
 - **Backend API**: FastAPI handles AI matching logic and metadata storage.
