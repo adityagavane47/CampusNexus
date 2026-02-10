@@ -34,7 +34,7 @@
 
 ## 🏗️ Architecture
 
-![CampusNexus Workflow](workflow_diagram.png)
+![CampusNexus Workflow](Freelance Marketplace Flow-2026-02-06-202733.png)
 
 - **Frontend**: React components for the Project Feed, Marketplace, and Profile.
 - **Backend API**: FastAPI handles AI matching logic and metadata storage.
