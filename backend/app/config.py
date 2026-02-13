@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     pinata_api_key: str = ""
     pinata_secret: str = ""
     
+    # Algorand Blockchain Configuration (TestNet)
+    algorand_algod_token: str = ""
+    algorand_algod_address: str = "https://testnet-api.algonode.cloud"
+    algorand_indexer_address: str = "https://testnet-idx.algonode.cloud"
+    
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]

@@ -106,20 +106,32 @@ class MilestoneEscrow(ARC4Contract):
         """
         Approve a milestone and release funds.
         Called by client to approve work and release payment.
+        
+        Security checks:
+        - Only client can approve
+        - Escrow must be active
+        - Cannot release more than total funded amount
+        - Milestone index must be valid
         """
         assert self.only_client(), "Only client can approve"
         assert self.status.value == String("active"), "Escrow not active"
+        assert milestone_index < self.num_milestones.value, "Invalid milestone index"
         
-        # Release funds to freelancer
+        # SECURITY: Prevent overpayment - ensure we don't release more than total funded
+        assert self.released_amount.value + amount <= self.total_amount.value, \
+            "Payment exceeds total escrow amount"
+        
+        # Release funds to freelancer via inner transaction
         itxn.Payment(
             receiver=self.freelancer.value,
             amount=amount,
             fee=UInt64(1000),
         ).submit()
         
+        # Update released amount
         self.released_amount.value = self.released_amount.value + amount
         
-        # Check if all milestones complete
+        # Auto-complete escrow if all funds released
         if self.released_amount.value >= self.total_amount.value:
             self.status.value = String("completed")
     

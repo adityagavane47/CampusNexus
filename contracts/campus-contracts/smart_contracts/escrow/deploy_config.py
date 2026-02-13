@@ -1,7 +1,6 @@
 import logging
-import os
-from algokit_utils import AlgorandClient
-from smart_contracts.artifacts.escrow.milestone_escrow_client import APP_SPEC
+import algokit_utils
+from smart_contracts.artifacts.escrow.milestone_escrow_client import MilestoneEscrowFactory
 
 logger = logging.getLogger(__name__)
 
@@ -9,30 +8,30 @@ logger = logging.getLogger(__name__)
 def deploy() -> None:
     """Deploy the MilestoneEscrow contract."""
     
-    # Use environment variables for connection
-    algorand = AlgorandClient.from_environment()
-
+    # Initialize Algorand client from environment
+    algorand = algokit_utils.AlgorandClient.from_environment()
+    
     # Get deployer account
-    mnemonic_phrase = os.getenv("DEPLOYER_MNEMONIC")
-    if mnemonic_phrase:
-        deployer = algorand.account.from_mnemonic(mnemonic=mnemonic_phrase)
-        logger.info(f"Deploying with account: {deployer.address}")
-    else:
-        deployer = algorand.account.localnet_dispenser()
-        logger.info(f"Deploying with Localnet dispenser: {deployer.address}")
+    deployer = algorand.account.from_environment("DEPLOYER")
+    logger.info(f"Deploying with account: {deployer.address}")
 
-    # Create App Factory
-    factory = algorand.client.get_app_factory(
-        app_spec=APP_SPEC,
-        app_name="MilestoneEscrow",
-        default_sender=deployer.address,
-        default_signer=deployer.signer,
+    # Create typed app factory
+    factory = algorand.client.get_typed_app_factory(
+        MilestoneEscrowFactory, 
+        default_sender=deployer.address
     )
 
-    # Deploy using create (simpler, avoids network lookup)
-    app = factory.create()
+    # Deploy the app (handles create/update logic)
+    app_client, result = factory.deploy(
+        on_update=algokit_utils.OnUpdate.AppendApp,
+        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
+    )
 
-    logger.info(f"Deployed MilestoneEscrow with app_id: {app.app_id}")
+    logger.info(
+        f"{'Created' if result.operation_performed == algokit_utils.OperationPerformed.Create else 'Updated'} "
+        f"MilestoneEscrow with app_id: {app_client.app_id}, "
+        f"app_address: {app_client.app_address}"
+    )
 
 
 def get_localnet_default_account(algod_client):

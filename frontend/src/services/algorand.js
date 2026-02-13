@@ -29,10 +29,10 @@ const NETWORKS = {
     },
 };
 
-// Current network - change this for deployment
+// Current network - TestNet has working deployed contracts
 const CURRENT_NETWORK = 'testnet';
 
-// Contract App IDs - Deployed on Testnet (2026-02-10)
+// Contract App IDs - Deployed on Testnet (previously deployed, working)
 export const CONTRACT_IDS = {
     escrow: 755290899,        // MilestoneEscrow App ID
     hustleScore: 755290900,   // HustleScore App ID
@@ -73,25 +73,27 @@ export async function getAccountBalance(address) {
 }
 
 /**
- * Create escrow transaction
+ * Create escrow transaction with milestone support
  */
 export async function createEscrowTransaction(
-    senderAddress,
+    clientAddress,
     freelancerAddress,
-    amountAlgo
+    numMilestones,
+    totalAmountAlgo
 ) {
     const client = getAlgodClient();
     const params = await client.getTransactionParams().do();
 
     // Application call to create escrow
     const appArgs = [
-        new TextEncoder().encode('create_escrow'),
+        new Uint8Array(Buffer.from('create_escrow')),
         algosdk.decodeAddress(freelancerAddress).publicKey,
-        algosdk.encodeUint64(amountAlgo * 1_000_000),
+        algosdk.encodeUint64(numMilestones),
+        new Uint8Array(Buffer.from('[]')),  // Milestone amounts placeholder
     ];
 
     const txn = algosdk.makeApplicationCallTxnFromObject({
-        from: senderAddress,
+        from: clientAddress,
         suggestedParams: params,
         appIndex: CONTRACT_IDS.escrow,
         appArgs: appArgs,
@@ -102,33 +104,9 @@ export async function createEscrowTransaction(
 }
 
 /**
- * Fund escrow transaction
+ * Fund escrow transaction (Atomic Transfer: Payment + App Call)
  */
 export async function fundEscrowTransaction(
-    senderAddress,
-    escrowAppId,
-    amountAlgo
-) {
-    const client = getAlgodClient();
-    const params = await client.getTransactionParams().do();
-
-    // Payment to escrow app
-    const escrowAddress = algosdk.getApplicationAddress(escrowAppId);
-
-    const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: senderAddress,
-        to: escrowAddress,
-        amount: amountAlgo * 1_000_000,
-        suggestedParams: params,
-    });
-
-    return paymentTxn;
-}
-
-/**
- * Release payment from escrow
- */
-export async function releasePaymentTransaction(
     clientAddress,
     escrowAppId,
     amountAlgo
@@ -136,9 +114,77 @@ export async function releasePaymentTransaction(
     const client = getAlgodClient();
     const params = await client.getTransactionParams().do();
 
+    // Get escrow app address
+    const appAddress = algosdk.getApplicationAddress(escrowAppId);
+
+    // Transaction 1: Payment to escrow app
+    const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        from: clientAddress,
+        to: appAddress,
+        amount: amountAlgo * 1_000_000,  // Convert ALGO to microALGOs
+        suggestedParams: params,
+    });
+
+    // Transaction 2: App call to fund_escrow
+    const appArgs = [new Uint8Array(Buffer.from('fund_escrow'))];
+    const appTxn = algosdk.makeApplicationCallTxnFromObject({
+        from: clientAddress,
+        suggestedParams: params,
+        appIndex: escrowAppId,
+        appArgs: appArgs,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+    });
+
+    // Group transactions for atomic execution
+    const txns = [payTxn, appTxn];
+    algosdk.assignGroupID(txns);
+
+    return txns;  // Returns array for Pera Wallet signing
+}
+
+/**
+ * Complete milestone transaction (freelancer marks work complete)
+ */
+export async function completeMilestoneTransaction(
+    freelancerAddress,
+    escrowAppId,
+    milestoneIndex
+) {
+    const client = getAlgodClient();
+    const params = await client.getTransactionParams().do();
+
     const appArgs = [
-        new TextEncoder().encode('release_payment'),
-        algosdk.encodeUint64(amountAlgo * 1_000_000),
+        new Uint8Array(Buffer.from('complete_milestone')),
+        algosdk.encodeUint64(milestoneIndex),
+    ];
+
+    const txn = algosdk.makeApplicationCallTxnFromObject({
+        from: freelancerAddress,
+        suggestedParams: params,
+        appIndex: escrowAppId,
+        appArgs: appArgs,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+    });
+
+    return txn;
+}
+
+/**
+ * Approve milestone and release payment (client approves freelancer's work)
+ */
+export async function approveMilestoneTransaction(
+    clientAddress,
+    escrowAppId,
+    milestoneIndex,
+    amountAlgo
+) {
+    const client = getAlgodClient();
+    const params = await client.getTransactionParams().do();
+
+    const appArgs = [
+        new Uint8Array(Buffer.from('approve_milestone')),
+        algosdk.encodeUint64(milestoneIndex),
+        algosdk.encodeUint64(amountAlgo * 1_000_000),  // Convert to microALGOs
     ];
 
     const txn = algosdk.makeApplicationCallTxnFromObject({
@@ -150,6 +196,13 @@ export async function releasePaymentTransaction(
     });
 
     return txn;
+}
+
+/**
+ * Legacy: Release payment transaction (deprecated - use approveMilestoneTransaction)
+ */
+export async function releasePaymentTransaction(clientAddress, escrowAppId, amountAlgo) {
+    return approveMilestoneTransaction(clientAddress, escrowAppId, 0, amountAlgo);
 }
 
 /**
@@ -172,6 +225,8 @@ export default {
     getAccountBalance,
     createEscrowTransaction,
     fundEscrowTransaction,
+    completeMilestoneTransaction,
+    approveMilestoneTransaction,
     releasePaymentTransaction,
     getCurrentNetwork,
     formatAlgo,
