@@ -11,7 +11,6 @@ from app.services.ai_matching import rank_projects
 from app.utils.database import get_all_projects
 
 router = APIRouter(
-    prefix="/ai",
     tags=["ai"],
 )
 

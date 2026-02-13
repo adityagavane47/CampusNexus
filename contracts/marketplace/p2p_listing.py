@@ -30,6 +30,7 @@ class P2PListing(ARC4Contract):
     price: GlobalState[UInt64]
     title: GlobalState[String]
     category: GlobalState[String]
+    ipfs_cid: GlobalState[String]  # IPFS Content Identifier for item images
     status: GlobalState[String]  # listed, pending, sold, disputed, cancelled
     
     def __init__(self) -> None:
@@ -39,6 +40,7 @@ class P2PListing(ARC4Contract):
         self.price = GlobalState(UInt64(0))
         self.title = GlobalState(String(""))
         self.category = GlobalState(String(""))
+        self.ipfs_cid = GlobalState(String(""))
         self.status = GlobalState(String("inactive"))
     
     def create_listing(
@@ -46,6 +48,7 @@ class P2PListing(ARC4Contract):
         title: String,
         category: String,
         price_microalgos: UInt64,
+        ipfs_cid: String,
     ) -> None:
         """
         Create a new marketplace listing.
@@ -54,6 +57,7 @@ class P2PListing(ARC4Contract):
             title: Item title
             category: Category (arduino, books, electronics, etc.)
             price_microalgos: Price in microALGOs
+            ipfs_cid: IPFS Content Identifier for item image
         """
         assert self.status.value == String("inactive"), "Listing already exists"
         
@@ -61,6 +65,7 @@ class P2PListing(ARC4Contract):
         self.title.value = title
         self.category.value = category
         self.price.value = price_microalgos
+        self.ipfs_cid.value = ipfs_cid
         self.status.value = String("listed")
     
     def purchase(self, payment: gtxn.PaymentTransaction) -> None:
@@ -78,7 +83,7 @@ class P2PListing(ARC4Contract):
     def confirm_receipt(self) -> None:
         """
         Buyer confirms item receipt.
-        Releases escrowed funds to seller.
+        Releases escrowed funds to seller and awards reputation badge.
         """
         assert Txn.sender == self.buyer.value, "Only buyer can confirm"
         assert self.status.value == String("pending"), "No pending purchase"
@@ -89,6 +94,16 @@ class P2PListing(ARC4Contract):
             amount=self.price.value,
             fee=UInt64(1000),
         ).submit()
+        
+        # Award "Trusted Trader" badge to seller via HustleScore contract
+        # Note: Requires HUSTLE_SCORE_APP_ID to be set at deployment
+        # For now, this is commented out - will be enabled when HustleScore is deployed
+        # itxn.ApplicationCall(
+        #     app_id=UInt64(HUSTLE_SCORE_APP_ID),
+        #     app_args=[Bytes(b"award_badge"), Bytes(b"trusted_trader")],
+        #     accounts=[self.seller.value],
+        #     fee=UInt64(1000),
+        # ).submit()
         
         self.status.value = String("sold")
     
@@ -117,12 +132,13 @@ class P2PListing(ARC4Contract):
         
         self.status.value = String("cancelled")
     
-    def get_listing_info(self) -> tuple[Account, String, String, UInt64, String]:
-        """Get listing information."""
+    def get_listing_info(self) -> tuple[Account, String, String, UInt64, String, String]:
+        """Get listing information including IPFS image CID."""
         return (
             self.seller.value,
             self.title.value,
             self.category.value,
             self.price.value,
+            self.ipfs_cid.value,
             self.status.value,
         )

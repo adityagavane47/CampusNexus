@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     oauth_redirect_uri: str = "http://localhost:8000/api/oauth"
     frontend_url: str = "http://localhost:5173"
     
+    # IPFS / Pinata Configuration
+    pinata_api_key: str = ""
+    pinata_secret: str = ""
+    
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]
@@ -42,6 +46,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"  # Allow extra fields in .env without error
 
 
 @lru_cache

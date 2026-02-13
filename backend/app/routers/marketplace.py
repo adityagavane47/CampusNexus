@@ -4,8 +4,10 @@ Endpoints for buying/selling used equipment
 """
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, File, UploadFile
 from pydantic import BaseModel
+
+from app.utils.ipfs import upload_to_ipfs, get_ipfs_url
 
 router = APIRouter()
 
@@ -20,7 +22,7 @@ class ListingCreate(BaseModel):
     category: str  # arduino, books, electronics, etc.
     price_algo: float
     condition: str  # new, like_new, good, fair
-    images: list[str] = []
+    ipfs_cid: str = ""  # IPFS Content Identifier for item image
     seller_address: str
 
 
@@ -32,10 +34,26 @@ class ListingResponse(BaseModel):
     category: str
     price_algo: float
     condition: str
-    images: list[str]
+    ipfs_cid: str
     seller_address: str
     status: str
     created_at: str
+
+
+@router.post("/upload-image")
+async def upload_listing_image(file: UploadFile = File(...)):
+    """
+    Upload a marketplace listing image to IPFS via Pinata.
+    
+    Returns the IPFS CID and gateway URL for the uploaded image.
+    """
+    result = await upload_to_ipfs(file)
+    
+    return {
+        "cid": result["cid"],
+        "gateway_url": result["gateway_url"],
+        "size_bytes": result["size"]
+    }
 
 
 @router.get("/", response_model=list[ListingResponse])

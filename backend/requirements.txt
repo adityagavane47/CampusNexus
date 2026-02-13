@@ -14,3 +14,9 @@ python-multipart>=0.0.6
 itsdangerous>=2.1.0
 email-validator>=2.0.0
 
+# AI/ML Dependencies for Semantic Skill Matching
+sentence-transformers>=2.2.2
+torch>=2.0.0
+
+# IPFS/Pinata Integration
+requests>=2.31.0

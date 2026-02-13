@@ -1,7 +1,4 @@
-/**
- * CampusNexus - AI Service
- * Endpoints for Track 2 features
- */
+
 
 const API_URL = 'http://localhost:8000/api';
 
