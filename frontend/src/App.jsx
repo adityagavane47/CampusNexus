@@ -53,7 +53,7 @@ function App() {
 
     const tabs = [
         { id: 'feed', label: 'Discover' },
-        { id: 'matcher', label: '✨ AI Match' },
+        { id: 'matcher', label: 'AI Match' },
         { id: 'marketplace', label: 'Marketplace' },
         { id: 'profile', label: 'Profile' },
     ];

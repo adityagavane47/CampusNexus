@@ -17,46 +17,15 @@ export function SkillMatcher() {
         setIsLoading(true);
         try {
             const skillsList = skillsInput.split(',').map(s => s.trim());
-            // In a real app we'd call the API:
-            // const results = await matchProjects(skillsList);
 
-            // For demo, we'll simulate the AI response since backend isn't connected to a real DB yet
-            // This mimics the exact response structure of our FastAPI endpoint
-            await new Promise(r => setTimeout(r, 1500)); // Simulate AI processing time
+            // Call real backend API
+            const results = await matchProjects(skillsList);
 
-            const mockResults = [
-                {
-                    project_id: 1,
-                    title: "Build IoT Dashboard",
-                    match_score: 95.5,
-                    skills_required: ["React", "Python", "IoT"]
-                },
-                {
-                    project_id: 2,
-                    title: "Smart Contract Audit",
-                    match_score: 45.0,
-                    skills_required: ["Solidity", "Security"]
-                }
-            ].filter(p => {
-                // Simple client-side simulation of the Jaccard logic for the demo
-                const pSkills = p.skills_required.map(s => s.toLowerCase());
-                const uSkills = skillsList.map(s => s.toLowerCase());
-                return pSkills.some(s => uSkills.includes(s));
-            });
-
-            // If no match in mock, return a generic one for demo purposes if relevant
-            if (mockResults.length === 0 && skillsInput.toLowerCase().includes('react')) {
-                mockResults.push({
-                    project_id: 1,
-                    title: "Build IoT Dashboard",
-                    match_score: 80.0,
-                    skills_required: ["React", "Python"]
-                });
-            }
-
-            setMatches(mockResults);
+            setMatches(results);
         } catch (error) {
             console.error('Matching failed:', error);
+            // Fallback to empty results on error
+            setMatches([]);
         } finally {
             setIsLoading(false);
         }
@@ -66,7 +35,7 @@ export function SkillMatcher() {
         <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div className="section-header" style={{ textAlign: 'center', display: 'block' }}>
                 <h2 className="section-title" style={{ fontSize: '2rem', marginBottom: '16px' }}>
-                    ✨ AI Skill Matcher
+                    AI Skill Matcher
                 </h2>
                 <p style={{ color: 'var(--text-secondary)' }}>
                     Enter your skills and let our AI find the perfect projects for you.
@@ -108,9 +77,16 @@ export function SkillMatcher() {
                     <div className="grid-2">
                         {matches.map(project => (
                             <div key={project.project_id} className="card" style={{ border: '1px solid var(--accent-black)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                                    <div className="tag tag-dark">
-                                        {project.match_score}% Match
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <div className="tag tag-dark">
+                                            🎯 {project.match_score}% Compatibility
+                                        </div>
+                                        {project.match_score >= 80 && (
+                                            <span style={{ color: 'var(--accent-green)', fontSize: '0.875rem', fontWeight: '500' }}>
+                                                ★ Highly Compatible
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
