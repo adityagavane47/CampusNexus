@@ -193,28 +193,6 @@ function App() {
                 </div>
             </section>
 
-            {/* Stats */}
-            <section style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '64px',
-                padding: '40px 24px',
-                borderBottom: '1px solid var(--border-light)',
-            }}>
-                <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>150+</p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Projects</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>500+</p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Students</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>25K</p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ALGO Traded</p>
-                </div>
-            </section>
-
             {/* Main Content */}
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
                 {activeTab === 'feed' && <ProjectFeed />}

@@ -88,10 +88,8 @@ async def google_login(request: Request):
 async def google_callback(request: Request):
     """Handle Google OAuth callback."""
     try:
-        # Get access token from Google
         token = await oauth.google.authorize_access_token(request)
         
-        # Get user info from Google
         user_info = token.get('userinfo')
         if not user_info:
             raise HTTPException(status_code=400, detail="Failed to get user info from Google")
@@ -152,18 +150,14 @@ async def github_login(request: Request):
 async def github_callback(request: Request):
     """Handle GitHub OAuth callback."""
     try:
-        # Get access token from GitHub
         token = await oauth.github.authorize_access_token(request)
         
-        # Get user info from GitHub
         resp = await oauth.github.get('user', token=token)
         user_info = resp.json()
         
-        # Get user email (might need separate API call)
         email_resp = await oauth.github.get('user/emails', token=token)
         emails = email_resp.json()
         
-        # Get primary email
         primary_email = None
         for email_data in emails:
             if email_data.get('primary'):

@@ -97,20 +97,26 @@ export function usePeraWallet() {
         }
     }, []);
 
-    const signTransaction = useCallback(async (txn) => {
-        if (!accountAddress) {
-            throw new Error('Wallet not connected');
-        }
-
+    const signTransaction = useCallback(async (txnOrTxns) => {
         try {
             const wallet = await getPeraWallet();
-            const signedTxn = await wallet.signTransaction([[{ txn }]]);
-            return signedTxn;
+
+            // Handle both single transaction and array of transactions
+            const txnsToSign = Array.isArray(txnOrTxns) ? txnOrTxns : [txnOrTxns];
+
+            // Format for Pera Wallet: array of groups, each group is array of {txn}
+            const txnGroup = txnsToSign.map(txn => ({ txn }));
+
+            // Sign and get the result
+            const signedTxns = await wallet.signTransaction([txnGroup]);
+
+            // Return the signed bytes (first element if single txn, otherwise array)
+            return Array.isArray(txnOrTxns) ? signedTxns : signedTxns[0];
         } catch (err) {
             console.error('Sign transaction error:', err);
             throw err;
         }
-    }, [accountAddress]);
+    }, []);
 
     const truncateAddress = (address) => {
         if (!address) return '';

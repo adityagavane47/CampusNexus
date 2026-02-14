@@ -12,7 +12,8 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit }) {
         budget_algo: '',
         deadline: '',
         skills_required: [],
-        milestones: []
+        milestones: [],
+        enableEscrow: false  // New: Toggle for blockchain escrow
     });
     const [currentSkill, setCurrentSkill] = useState('');
     const [currentMilestone, setCurrentMilestone] = useState('');
@@ -67,7 +68,8 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit }) {
             budget_algo: '',
             deadline: '',
             skills_required: [],
-            milestones: []
+            milestones: [],
+            enableEscrow: false
         });
     };
 
@@ -249,6 +251,24 @@ export function CreateProjectModal({ isOpen, onClose, onSubmit }) {
                                 ))}
                             </ul>
                         )}
+                    </div>
+
+                    {/* Escrow Toggle */}
+                    <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: 0 }}>
+                            <input
+                                type="checkbox"
+                                checked={formData.enableEscrow}
+                                onChange={e => setFormData({ ...formData, enableEscrow: e.target.checked })}
+                                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                            />
+                            <div>
+                                <div style={{ fontWeight: 600, marginBottom: '4px' }}>🔒 Enable Blockchain Escrow Protection</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                    Secure funds with Algorand smart contract (connects your wallet)
+                                </div>
+                            </div>
+                        </label>
                     </div>
 
                     <div className="grid-2" style={{ marginBottom: '24px' }}>

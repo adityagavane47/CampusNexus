@@ -3,11 +3,15 @@
  */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { useEscrow } from '../../hooks/useEscrow';
+import { usePeraWallet } from '../../hooks/usePeraWallet';
 import { projectsService } from '../../services/projects';
 import { CreateProjectModal } from './CreateProjectModal';
 
 export function ProjectFeed() {
     const { user } = useAuth();
+    const { accountAddress, connect: connectWallet, isConnected, signTransaction } = usePeraWallet();
+    const { createEscrow, isLoading: escrowLoading, error: escrowError } = useEscrow();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,12 +39,49 @@ export function ProjectFeed() {
 
     const handleCreateProject = async (projectData) => {
         try {
+            let escrowData = {};
+
+            // If escrow is enabled, verify wallet and store intent
+            if (projectData.enableEscrow) {
+                let walletAddress = accountAddress;
+
+                if (!isConnected || !accountAddress) {
+                    alert('Please connect your Algorand wallet to enable escrow protection.');
+                    const connectedAddress = await connectWallet();
+
+                    if (!connectedAddress) {
+                        alert('Wallet connection cancelled. Project not created.');
+                        return;
+                    }
+
+                    walletAddress = connectedAddress;
+                }
+
+                // Store escrow intent - actual smart contract will be created
+                // when a freelancer applicant is accepted (needs their address)
+                escrowData = {
+                    escrow_enabled: true,
+                    client_wallet: walletAddress,
+                    budget_algo: projectData.budget_algo,
+                    num_milestones: projectData.milestones.length || 1,
+                };
+
+                console.log('Escrow protection enabled with wallet:', walletAddress);
+            }
+
+            // Submit project to backend
             await projectsService.createProject({
                 ...projectData,
-                creator_id: user.id
+                creator_id: user.id,
+                ...escrowData,
             });
+
             setIsModalOpen(false);
-            loadProjects(); // Refresh the list
+            loadProjects();
+
+            if (escrowData.escrow_enabled) {
+                alert('Project created with escrow protection enabled! The smart contract will be deployed when you accept a freelancer.');
+            }
         } catch (err) {
             alert('Failed to create project. Please try again.');
             console.error(err);
@@ -86,7 +127,6 @@ export function ProjectFeed() {
                 )}
             </div>
 
-            {/* Filter */}
             <div style={{ marginBottom: '24px' }}>
                 <input
                     type="text"
@@ -120,7 +160,6 @@ export function ProjectFeed() {
                                     {project.description}
                                 </p>
 
-                                {/* Creator Info */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
                                     <div style={{
                                         width: '24px',

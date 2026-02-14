@@ -1,0 +1,15 @@
+
+@router.post("/upload-image")
+async def upload_listing_image(file: UploadFile = File(...)):
+    """
+    Upload a marketplace listing image to IPFS via Pinata.
+    
+    Returns the IPFS CID and gateway URL for the uploaded image.
+    """
+    result = await upload_to_ipfs(file)
+    
+    return {
+        "cid": result["cid"],
+        "gateway_url": result["gateway_url"],
+        "size_bytes": result["size"]
+    }

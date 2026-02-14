@@ -8,7 +8,7 @@ import { getAccountBalance } from '../../services/algorand';
 import { projectsService } from '../../services/projects';
 
 export function Profile() {
-    const { isConnected, accountAddress, connect } = usePeraWallet();
+    const { isConnected, accountAddress, connect, disconnect } = usePeraWallet();
     const { user } = useAuth();
     const [balance, setBalance] = useState(0);
     const [isEditingName, setIsEditingName] = useState(false);
@@ -166,18 +166,83 @@ export function Profile() {
                         {user?.branch ? `${user.branch} • ${user.year}` : user?.college}
                     </p>
 
-                    {/* Wallet Connection Logic */}
-                    {user?.wallet_address || accountAddress ? (
-                        <p style={{ fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                            {(user?.wallet_address || accountAddress).slice(0, 6)}...{(user?.wallet_address || accountAddress).slice(-6)}
-                            {accountAddress && user?.wallet_address && accountAddress !== user.wallet_address && (
-                                <span style={{ marginLeft: '8px', color: '#ff9800', fontSize: '0.75rem' }}>
-                                    (Wallet mismatch)
-                                </span>
-                            )}
-                        </p>
-                    ) : (
-                        <div style={{ marginTop: '8px' }}>
+                    {/* Wallet Connection Section */}
+                    <div style={{ marginTop: '12px' }}>
+                        {user?.wallet_address || accountAddress ? (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '12px',
+                                backgroundColor: 'var(--bg-primary)',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-light)'
+                            }}>
+                                <div style={{ flex: 1 }}>
+                                    <p style={{
+                                        fontSize: '0.75rem',
+                                        color: 'var(--text-muted)',
+                                        marginBottom: '4px',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em'
+                                    }}>
+                                        🔗 Algorand Wallet
+                                    </p>
+                                    <p style={{
+                                        fontFamily: 'monospace',
+                                        fontSize: '0.875rem',
+                                        color: 'var(--text-primary)',
+                                        margin: 0
+                                    }}>
+                                        {(user?.wallet_address || accountAddress).slice(0, 8)}...{(user?.wallet_address || accountAddress).slice(-8)}
+                                    </p>
+                                    {accountAddress && user?.wallet_address && accountAddress !== user.wallet_address && (
+                                        <span style={{
+                                            fontSize: '0.75rem',
+                                            color: '#ff9800',
+                                            display: 'block',
+                                            marginTop: '4px'
+                                        }}>
+                                            ⚠️ Wallet mismatch
+                                        </span>
+                                    )}
+                                </div>
+                                {isConnected && (
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                await disconnect();
+                                                // Optionally clear from backend
+                                                const { authService } = await import('../../services/auth');
+                                                await authService.updateProfile(user.id, { wallet_address: null });
+                                                window.location.reload();
+                                            } catch (err) {
+                                                console.error('Disconnect error:', err);
+                                            }
+                                        }}
+                                        style={{
+                                            backgroundColor: '#ffebee',
+                                            color: '#c62828',
+                                            border: '1px solid #ffcdd2',
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.875rem',
+                                            fontWeight: 500,
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = '#ffcdd2';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = '#ffebee';
+                                        }}
+                                    >
+                                        Disconnect
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
                             <button
                                 onClick={async () => {
                                     try {
@@ -197,23 +262,30 @@ export function Profile() {
                                     }
                                 }}
                                 style={{
-                                    backgroundColor: '#ffeee5', // Pera yellow-ish
+                                    backgroundColor: '#ffeee5',
                                     color: '#b06000',
                                     border: '1px solid #ffd0b0',
-                                    padding: '6px 12px',
-                                    borderRadius: '20px',
+                                    padding: '10px 16px',
+                                    borderRadius: '8px',
                                     cursor: 'pointer',
                                     fontSize: '0.875rem',
                                     fontWeight: 500,
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '6px'
+                                    gap: '8px',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = '#ffd7b8';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = '#ffeee5';
                                 }}
                             >
                                 🔗 Connect Pera Wallet
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 

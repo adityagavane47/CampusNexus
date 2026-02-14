@@ -12,7 +12,7 @@ try:
         info = client.account.get_information(acct.address)
         print(f"Address: {acct.address}")
         print(f"Balance: {info.amount} microAlgos")
-        print(f"Balance: {info.amount/1_000_000} ALGO")
+        print(f"Balance: {info.amount.micro_algo/1_000_000} ALGO")
     else:
         print("No DEPLOYER_MNEMONIC set")
 except Exception as e:

@@ -3,7 +3,8 @@
  * React hook for interacting with the Milestone Escrow contract
  */
 import { useState, useCallback } from 'react';
-import { usePeraWallet } from './usePeraWallet';
+import algosdk from 'algosdk';
+
 import {
     createEscrowTransaction,
     fundEscrowTransaction,
@@ -12,16 +13,15 @@ import {
 } from '../services/algorand';
 
 export function useEscrow() {
-    const { accountAddress, signTransaction, isConnected } = usePeraWallet();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
     /**
      * Create a new escrow for a project
      */
-    const createEscrow = useCallback(async (freelancerAddress, amountAlgo) => {
-        if (!isConnected) {
-            setError('Please connect your wallet first');
+    const createEscrow = useCallback(async (accountAddress, signer, freelancerAddress, totalAmountAlgo, numMilestones = 1) => {
+        if (!accountAddress || !signer) {
+            setError('Wallet not connected or signer missing');
             return null;
         }
 
@@ -32,11 +32,12 @@ export function useEscrow() {
             const txn = await createEscrowTransaction(
                 accountAddress,
                 freelancerAddress,
-                amountAlgo
+                numMilestones,
+                totalAmountAlgo
             );
 
             // Sign with Pera Wallet
-            const signedTxn = await signTransaction(txn);
+            const signedTxn = await signer(txn);
 
             // Submit transaction
             const client = getAlgodClient();
@@ -54,14 +55,14 @@ export function useEscrow() {
         } finally {
             setIsLoading(false);
         }
-    }, [accountAddress, signTransaction, isConnected]);
+    }, []);
 
     /**
      * Fund an existing escrow
      */
-    const fundEscrow = useCallback(async (escrowAppId, amountAlgo) => {
-        if (!isConnected) {
-            setError('Please connect your wallet first');
+    const fundEscrow = useCallback(async (accountAddress, signer, escrowAppId, amountAlgo) => {
+        if (!accountAddress || !signer) {
+            setError('Wallet not connected');
             return null;
         }
 
@@ -75,7 +76,7 @@ export function useEscrow() {
                 amountAlgo
             );
 
-            const signedTxn = await signTransaction(txn);
+            const signedTxn = await signer(txn);
             const client = getAlgodClient();
             const { txId } = await client.sendRawTransaction(signedTxn).do();
             const result = await algosdk.waitForConfirmation(client, txId, 4);
@@ -89,14 +90,14 @@ export function useEscrow() {
         } finally {
             setIsLoading(false);
         }
-    }, [accountAddress, signTransaction, isConnected]);
+    }, []);
 
     /**
      * Release payment to freelancer
      */
-    const releasePayment = useCallback(async (escrowAppId, amountAlgo) => {
-        if (!isConnected) {
-            setError('Please connect your wallet first');
+    const releasePayment = useCallback(async (accountAddress, signer, escrowAppId, amountAlgo) => {
+        if (!accountAddress || !signer) {
+            setError('Wallet not connected');
             return null;
         }
 
@@ -110,7 +111,7 @@ export function useEscrow() {
                 amountAlgo
             );
 
-            const signedTxn = await signTransaction(txn);
+            const signedTxn = await signer(txn);
             const client = getAlgodClient();
             const { txId } = await client.sendRawTransaction(signedTxn).do();
             const result = await algosdk.waitForConfirmation(client, txId, 4);
@@ -124,7 +125,7 @@ export function useEscrow() {
         } finally {
             setIsLoading(false);
         }
-    }, [accountAddress, signTransaction, isConnected]);
+    }, []);
 
     return {
         createEscrow,

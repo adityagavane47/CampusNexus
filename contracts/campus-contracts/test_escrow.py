@@ -38,12 +38,16 @@ def test_create_escrow():
     
     if response.status_code == 200:
         result = response.json()
-        print(f"✅ Escrow created successfully!")
-        print(f"   Escrow ID: {result['id']}")
-        print(f"   Status: {result['status']}")
-        print(f"   Total Amount: {result['total_amount_algo']} ALGO")
-        print(f"   Milestones: {len(result['milestones'])}")
-        return result['id']
+        print(f"✅ Escrow metadata created successfully!")
+        print(f"   Message: {result.get('message')}")
+        if 'contract_params' in result:
+             print(f"   Contract Params: Present")
+        
+        # authentic App ID from previous deployment for testing subsequent steps
+        # In a real flow, the frontend would deploy and get this ID.
+        TEST_APP_ID = 755290189 
+        print(f"   Using existing App ID for tests: {TEST_APP_ID}")
+        return TEST_APP_ID
     else:
         print(f"❌ Failed to create escrow: {response.status_code}")
         print(response.text)
@@ -57,14 +61,15 @@ def test_get_escrow(escrow_id):
     
     if response.status_code == 200:
         result = response.json()
-        print(f"✅ Escrow retrieved successfully!")
+        print(f"✅ Escrow retrieved successfully from blockchain!")
         print(f"   Client: {result['client_address']}")
         print(f"   Freelancer: {result['freelancer_address']}")
         print(f"   Status: {result['status']}")
-        print(f"   Created: {result['created_at']}")
+        # print(f"   Created: {result['created_at']}") # created_at might be None in response model
         return result
     else:
         print(f"❌ Failed to get escrow: {response.status_code}")
+        print(response.text)
         return None
 
 def test_complete_milestone(escrow_id, milestone_index):
@@ -75,6 +80,7 @@ def test_complete_milestone(escrow_id, milestone_index):
         "freelancer_address": "FREELANCER_WALLET_ADDRESS_456"
     }
     
+    # URL query params
     response = requests.post(
         f"{BASE_URL}/{escrow_id}/milestone/{milestone_index}/complete",
         params=params
@@ -82,12 +88,12 @@ def test_complete_milestone(escrow_id, milestone_index):
     
     if response.status_code == 200:
         result = response.json()
-        print(f"✅ Milestone marked as complete!")
+        print(f"✅ Milestone completion instruction received!")
         print(f"   Message: {result['message']}")
-        print(f"   Milestone Status: {result['milestone']['status']}")
+        print(f"   Tx Params: {result['params']}")
         return True
     else:
-        print(f"❌ Failed to complete milestone: {response.status_code}")
+        print(f"❌ Failed to request milestone completion: {response.status_code}")
         print(response.text)
         return False
 
@@ -96,7 +102,8 @@ def test_approve_milestone(escrow_id, milestone_index):
     print(f"\n=== TEST 4: Approve Milestone {milestone_index} ===")
     
     params = {
-        "client_address": "CLIENT_WALLET_ADDRESS_123"
+        "client_address": "CLIENT_WALLET_ADDRESS_123",
+         "amount_algo": 10.0
     }
     
     response = requests.post(
@@ -106,12 +113,12 @@ def test_approve_milestone(escrow_id, milestone_index):
     
     if response.status_code == 200:
         result = response.json()
-        print(f"✅ Milestone approved and funds released!")
+        print(f"✅ Milestone approval instruction received!")
         print(f"   Message: {result['message']}")
-        print(f"   Milestone Status: {result['milestone']['status']}")
+        print(f"   Tx Params: {result['params']}")
         return True
     else:
-        print(f"❌ Failed to approve milestone: {response.status_code}")
+        print(f"❌ Failed to request milestone approval: {response.status_code}")
         print(response.text)
         return False
 
@@ -145,9 +152,9 @@ def main():
     final_escrow = test_get_escrow(escrow_id)
     if final_escrow:
         print(f"\n📊 SUMMARY:")
-        print(f"   Total Milestones: {len(final_escrow['milestones'])}")
-        approved_count = sum(1 for m in final_escrow['milestones'] if m['status'] == 'approved')
-        print(f"   Approved Milestones: {approved_count}")
+        print(f"   Total Milestones: {final_escrow.get('num_milestones', 'N/A')}")
+        print(f"   Completed Milestones: {final_escrow.get('completed_milestones', 'N/A')}")
+        # approved_count check removed as individual milestone data is not in response
         print(f"   Escrow Status: {final_escrow['status']}")
     
     print("\n" + "=" * 50)

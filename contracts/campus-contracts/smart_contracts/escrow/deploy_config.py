@@ -35,6 +35,5 @@ def deploy() -> None:
 
 
 def get_localnet_default_account(algod_client):
-    """Deprecated helper."""
-    # This is kept only if needed by other imports, but deploying logic is updated.
+    """Deprecated helper for localnet deployment."""
     pass

@@ -34,7 +34,7 @@ const CURRENT_NETWORK = 'testnet';
 
 // Contract App IDs - Deployed on Testnet (previously deployed, working)
 export const CONTRACT_IDS = {
-    escrow: 755290899,        // MilestoneEscrow App ID
+    escrow: 755290189,        // MilestoneEscrow App ID
     hustleScore: 755290900,   // HustleScore App ID
 };
 
@@ -65,7 +65,7 @@ export async function getAccountBalance(address) {
     try {
         const client = getAlgodClient();
         const accountInfo = await client.accountInformation(address).do();
-        return accountInfo.amount / 1_000_000; // Convert microAlgos to ALGO
+        return Number(accountInfo.amount) / 1_000_000; // Convert microAlgos to ALGO
     } catch (error) {
         console.error('Error fetching balance:', error);
         return 0;
@@ -81,16 +81,46 @@ export async function createEscrowTransaction(
     numMilestones,
     totalAmountAlgo
 ) {
+    console.log('[Escrow] createEscrowTransaction called with:', {
+        clientAddress,
+        freelancerAddress,
+        numMilestones,
+        totalAmountAlgo
+    });
+
+    // Validate client address
+    if (!clientAddress) {
+        throw new Error('Client address must not be null or undefined');
+    }
+
+    // Use client address as placeholder if freelancer not specified
+    const freelancer = freelancerAddress || clientAddress;
+    console.log('[Escrow] Using freelancer address:', freelancer);
+
     const client = getAlgodClient();
+    console.log('[Escrow] Got algod client, fetching params...');
+
     const params = await client.getTransactionParams().do();
+    console.log('[Escrow] Got suggested params:', params);
+
+    console.log('[Escrow] Decoding freelancer address...');
+    const decodedFreelancer = algosdk.decodeAddress(freelancer);
+    console.log('[Escrow] Decoded freelancer OK');
+
+    console.log('[Escrow] Encoding numMilestones:', numMilestones);
+    const encodedMilestones = algosdk.encodeUint64(numMilestones);
+    console.log('[Escrow] Encoded milestones OK');
 
     // Application call to create escrow
     const appArgs = [
         new Uint8Array(Buffer.from('create_escrow')),
-        algosdk.decodeAddress(freelancerAddress).publicKey,
-        algosdk.encodeUint64(numMilestones),
-        new Uint8Array(Buffer.from('[]')),  // Milestone amounts placeholder
+        decodedFreelancer.publicKey,
+        encodedMilestones,
+        new Uint8Array(Buffer.from('[]')),
     ];
+
+    console.log('[Escrow] Building transaction with appIndex:', CONTRACT_IDS.escrow);
+    console.log('[Escrow] from address:', clientAddress);
 
     const txn = algosdk.makeApplicationCallTxnFromObject({
         from: clientAddress,
@@ -100,6 +130,7 @@ export async function createEscrowTransaction(
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
     });
 
+    console.log('[Escrow] Transaction created successfully');
     return txn;
 }
 

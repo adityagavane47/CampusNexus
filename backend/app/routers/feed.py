@@ -26,6 +26,11 @@ class ProjectCreate(BaseModel):
     deadline: str
     milestones: List[str]
     creator_id: str  # User ID from OAuth
+    escrow_app_id: Optional[int] = None  # Optional: Algorand App ID if escrow enabled
+    escrow_enabled: Optional[bool] = False  # Whether escrow protection is enabled
+    client_wallet: Optional[str] = None  # Client's Algorand wallet address
+    num_milestones: Optional[int] = None  # Number of milestones for escrow
+    enableEscrow: Optional[bool] = None  # Frontend toggle field (accepted but ignored)
 
 
 class ProjectResponse(BaseModel):

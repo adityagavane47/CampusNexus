@@ -186,6 +186,7 @@ def create_project(project_data: Dict) -> Dict:
         "creator_id": project_data.get("creator_id"),
         "creator_name": creator.get("name") if creator else "Unknown",
         "creator_avatar": creator.get("profile_picture") or creator.get("avatar") if creator else None,
+        "escrow_app_id": project_data.get("escrow_app_id"),  # Store Algorand App ID
         "status": "open",
         "created_at": datetime.utcnow().isoformat(),
         "applications": []
