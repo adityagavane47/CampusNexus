@@ -10,6 +10,7 @@ from algosdk.v2client import algod
 from algosdk import encoding
 
 from app.config import get_settings
+from app.services import hustle_score
 
 router = APIRouter()
 settings = get_settings()
@@ -151,14 +152,16 @@ async def complete_milestone(escrow_id: int, milestone_index: int, freelancer_ad
 
 
 @router.post("/{escrow_id}/milestone/{milestone_index}/approve")
-async def approve_milestone(escrow_id: int, milestone_index: int, client_address: str, amount_algo: float):
+async def approve_milestone(escrow_id: int, milestone_index: int, client_address: str, amount_algo: float, freelancer_address: Optional[str] = None):
     """
     Helper endpoint to prepare approval transaction.
     
+    Also triggers Hustle Score reputation update for the freelancer.
+    
     NOTE: Actual approval happens via blockchain transaction.
-    This endpoint helps frontend construct the transaction.
+    This endpoint helps frontend construct the transaction and awards reputation.
     """
-    return {
+    result = {
         "message": f"Submit 'approve_milestone' transaction to App ID {escrow_id}",
         "params": {
             "app_id": escrow_id,
@@ -168,3 +171,17 @@ async def approve_milestone(escrow_id: int, milestone_index: int, client_address
             "signer": client_address
         }
     }
+    
+    # Award Hustle Score reputation to freelancer
+    if freelancer_address:
+        try:
+            print(f"🎯 Awarding 10 Hustle Score points to {freelancer_address} for milestone approval")
+            await hustle_score.add_reputation_points(freelancer_address, points=10)
+            result["hustle_score_awarded"] = 10
+            result["hustle_score_message"] = "Freelancer earned 10 reputation points!"
+        except Exception as e:
+            print(f"⚠️ Failed to award Hustle Score: {e}")
+            result["hustle_score_error"] = str(e)
+    
+    return result
+

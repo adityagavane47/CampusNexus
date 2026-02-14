@@ -1,73 +1,47 @@
-"""
-Simple deployment script for MilestoneEscrow contract (LocalNet)
-Run this directly to bypass caching issues: poetry run python simple_deploy.py
-"""
 import logging
 import algokit_utils
-from smart_contracts.artifacts.escrow.milestone_escrow_client import MilestoneEscrowFactory
 from smart_contracts.artifacts.hustle_score.hustle_score_client import HustleScoreFactory
+import traceback
+from dotenv import load_dotenv
+import os
 
+# Load .env explicitly
+load_dotenv()
+
+# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def main():
-    """Deploy contracts to LocalNet."""
-    
-    # Initialize Algorand client (reads from .env)
-    algorand = algokit_utils.AlgorandClient.from_environment()
-    
-    # Use LocalNet dispenser account (pre-funded)
-    deployer = algorand.account.localnet_dispenser()
-    logger.info(f"Deploying with LocalNet dispenser: {deployer.address}")
-    
-    # Deploy MilestoneEscrow
-    logger.info("=" * 50)
-    logger.info("Deploying MilestoneEscrow...")
-    escrow_factory = algorand.client.get_typed_app_factory(
-        MilestoneEscrowFactory,
-        default_sender=deployer.address
-    )
-    
-    escrow_client, escrow_result = escrow_factory.deploy(
-        on_update=algokit_utils.OnUpdate.AppendApp,
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-    )
-    
-    logger.info(f"✅ Deployed MilestoneEscrow!")
-    logger.info(f"   App ID: {escrow_client.app_id}")
-    logger.info(f"   App Address: {escrow_client.app_address}")
-    
-    # Deploy HustleScore
-    logger.info("=" * 50)
-    logger.info("Deploying HustleScore...")
-    hustle_factory = algorand.client.get_typed_app_factory(
-        HustleScoreFactory,
-        default_sender=deployer.address
-    )
-    
-    hustle_client, hustle_result = hustle_factory.deploy(
-        on_update=algokit_utils.OnUpdate.AppendApp,
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-    )
-    
-    logger.info(f"✅ Deployed HustleScore!")
-    logger.info(f"   App ID: {hustle_client.app_id}")
-    logger.info(f"   App Address: {hustle_client.app_address}")
-    
-    # Summary
-    logger.info("=" * 50)
-    logger.info("🎉 DEPLOYMENT COMPLETE!")
-    logger.info("=" * 50)
-    logger.info(f"MilestoneEscrow App ID: {escrow_client.app_id}")
-    logger.info(f"HustleScore App ID: {hustle_client.app_id}")
-    logger.info("")
-    logger.info("✏️  UPDATE FRONTEND CONFIG:")
-    logger.info(f"   Edit: frontend/src/services/algorand.js")
-    logger.info(f"   Set: CONTRACT_IDS = {{")
-    logger.info(f"       escrow: {escrow_client.app_id},")
-    logger.info(f"       hustleScore: {hustle_client.app_id},")
-    logger.info(f"   }}")
-    
+    try:
+        # Initialize Algorand client
+        algorand = algokit_utils.AlgorandClient.from_environment()
+        
+        # Get deployer account
+        deployer = algorand.account.from_environment("DEPLOYER")
+        logger.info(f"Deploying with account: {deployer.address}")
+        
+        # Create factory
+        factory = algorand.client.get_typed_app_factory(
+            HustleScoreFactory, 
+            default_sender=deployer.address
+        )
+        
+        # Try create explicitly (bypassing idempotent deploy logic)
+        logger.info("Attempting to CREATE app via deploy with unique name...")
+        
+        # Use deploy but with a new name to force creation
+        app_client, result = factory.deploy(
+             app_name="HustleScore-Clean-V2", 
+             on_update=algokit_utils.OnUpdate.AppendApp,
+             on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
+        )
+        
+        logger.info(f"Deployed successfully! App ID: {app_client.app_id}")
+        
+    except Exception as e:
+        logger.error(f"Deployment failed: {e}")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()

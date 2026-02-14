@@ -35,7 +35,7 @@ const CURRENT_NETWORK = 'testnet';
 // Contract App IDs - Deployed on Testnet (previously deployed, working)
 export const CONTRACT_IDS = {
     escrow: 755290189,        // MilestoneEscrow App ID
-    hustleScore: 755290900,   // HustleScore App ID
+    hustleScore: 755519723,   // HustleScore App ID
 };
 
 /**

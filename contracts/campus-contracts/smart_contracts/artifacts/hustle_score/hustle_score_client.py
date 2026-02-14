@@ -19,7 +19,7 @@ from algosdk.v2client.models import SimulateTraceConfig
 import algokit_utils
 from algokit_utils import AlgorandClient as _AlgoKitAlgorandClient
 
-_APP_SPEC_JSON = r"""{"arcs": [22, 28], "bareActions": {"call": [], "create": []}, "methods": [{"actions": {"call": [], "create": ["NoOp"]}, "args": [], "name": "create", "returns": {"type": "string"}, "desc": "Initialize the contract with creator as admin.", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "address", "name": "student"}, {"type": "uint64", "name": "points"}], "name": "add_reputation", "returns": {"type": "string"}, "desc": "Add reputation points to a student (admin only).", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "address", "name": "student"}, {"type": "uint64", "name": "points"}], "name": "remove_reputation", "returns": {"type": "string"}, "desc": "Remove reputation points (for disputes, admin only).", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_total_minted", "returns": {"type": "uint64"}, "desc": "Get total reputation points minted.", "events": [], "readonly": true, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_admin", "returns": {"type": "address"}, "desc": "Get the admin address.", "events": [], "readonly": true, "recommendations": {}}], "name": "HustleScore", "state": {"keys": {"box": {}, "global": {"admin": {"key": "YWRtaW4=", "keyType": "AVMString", "valueType": "address"}, "total_minted": {"key": "dG90YWxfbWludGVk", "keyType": "AVMString", "valueType": "AVMUint64"}}, "local": {}}, "maps": {"box": {}, "global": {}, "local": {}}, "schema": {"global": {"bytes": 1, "ints": 1}, "local": {"bytes": 0, "ints": 0}}}, "structs": {}, "byteCode": {"approval": "CyAEAAEgCCYDDHRvdGFsX21pbnRlZAVhZG1pbgQVH3x1MRhAAAMoImcxGRREMRhBACSCBAR9TTCtBMpGuAMEIuTFoAQ0az28NhoAjgQAPAB3AKoAtQCABNbocU02GgCOAQABACkxAGcoImeAIRUffHUAG0h1c3RsZVNjb3JlIFNCVCBpbml0aWFsaXplZLAjQzYaARUkEkQ2GgJJFSUSRBcxACIpZUQSRCIoZUQIKExngBYVH3x1ABBSZXB1dGF0aW9uIGFkZGVksCNDNhoBFSQSRDYaAhUlEkQxACIpZUQSRIAYFR98dQASUmVwdXRhdGlvbiByZW1vdmVksCNDIihlRBYqTFCwI0MiKWVEKkxQsCND", "clear": "C4EBQw=="}, "desc": "\n    Hustle Score SBT for CampusNexus\n    \n    Features:\n    - Non-transferable (soulbound)\n    - Score increases with completed projects\n    - Admin-managed minting\n    ", "events": [], "networks": {}, "source": {"approval": "I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuYXBwcm92YWxfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIGludGNibG9jayAwIDEgMzIgOAogICAgYnl0ZWNibG9jayAidG90YWxfbWludGVkIiAiYWRtaW4iIDB4MTUxZjdjNzUKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBibnogbWFpbl9hZnRlcl9pZl9lbHNlQDIKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6MjEKICAgIC8vIHNlbGYudG90YWxfbWludGVkID0gR2xvYmFsU3RhdGUoVUludDY0KDApKQogICAgYnl0ZWNfMCAvLyAidG90YWxfbWludGVkIgogICAgaW50Y18wIC8vIDAKICAgIGFwcF9nbG9iYWxfcHV0CgptYWluX2FmdGVyX2lmX2Vsc2VAMjoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6OQogICAgLy8gY2xhc3MgSHVzdGxlU2NvcmUoQVJDNENvbnRyYWN0KToKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGJ6IG1haW5fY3JlYXRlX05vT3BAMTAKICAgIHB1c2hieXRlc3MgMHg3ZDRkMzBhZCAweGNhNDZiODAzIDB4MjJlNGM1YTAgMHgzNDZiM2RiYyAvLyBtZXRob2QgImFkZF9yZXB1dGF0aW9uKGFkZHJlc3MsdWludDY0KXN0cmluZyIsIG1ldGhvZCAicmVtb3ZlX3JlcHV0YXRpb24oYWRkcmVzcyx1aW50NjQpc3RyaW5nIiwgbWV0aG9kICJnZXRfdG90YWxfbWludGVkKCl1aW50NjQiLCBtZXRob2QgImdldF9hZG1pbigpYWRkcmVzcyIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDAKICAgIG1hdGNoIGFkZF9yZXB1dGF0aW9uIHJlbW92ZV9yZXB1dGF0aW9uIGdldF90b3RhbF9taW50ZWQgZ2V0X2FkbWluCiAgICBlcnIKCm1haW5fY3JlYXRlX05vT3BAMTA6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjkKICAgIC8vIGNsYXNzIEh1c3RsZVNjb3JlKEFSQzRDb250cmFjdCk6CiAgICBwdXNoYnl0ZXMgMHhkNmU4NzE0ZCAvLyBtZXRob2QgImNyZWF0ZSgpc3RyaW5nIgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAogICAgbWF0Y2ggY3JlYXRlCiAgICBlcnIKCgovLyBzbWFydF9jb250cmFjdHMuaHVzdGxlX3Njb3JlLmNvbnRyYWN0Lkh1c3RsZVNjb3JlLmNyZWF0ZVtyb3V0aW5nXSgpIC0+IHZvaWQ6CmNyZWF0ZToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6MjYKICAgIC8vIHNlbGYuYWRtaW4udmFsdWUgPSBUeG4uc2VuZGVyCiAgICBieXRlY18xIC8vICJhZG1pbiIKICAgIHR4biBTZW5kZXIKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjI3CiAgICAvLyBzZWxmLnRvdGFsX21pbnRlZC52YWx1ZSA9IFVJbnQ2NCgwKQogICAgYnl0ZWNfMCAvLyAidG90YWxfbWludGVkIgogICAgaW50Y18wIC8vIDAKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjIzCiAgICAvLyBAYWJpbWV0aG9kKGNyZWF0ZT0icmVxdWlyZSIpCiAgICBwdXNoYnl0ZXMgMHgxNTFmN2M3NTAwMWI0ODc1NzM3NDZjNjU1MzYzNmY3MjY1MjA1MzQyNTQyMDY5NmU2OTc0Njk2MTZjNjk3YTY1NjQKICAgIGxvZwogICAgaW50Y18xIC8vIDEKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5odXN0bGVfc2NvcmUuY29udHJhY3QuSHVzdGxlU2NvcmUuYWRkX3JlcHV0YXRpb25bcm91dGluZ10oKSAtPiB2b2lkOgphZGRfcmVwdXRhdGlvbjoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6MzAKICAgIC8vIEBhYmltZXRob2QoKQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgbGVuCiAgICBpbnRjXzIgLy8gMzIKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQuc3RhdGljX2FycmF5PGFyYzQudWludDgsIDMyPgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMgogICAgZHVwCiAgICBsZW4KICAgIGludGNfMyAvLyA4CiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LnVpbnQ2NAogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTozMwogICAgLy8gYXNzZXJ0IFR4bi5zZW5kZXIgPT0gc2VsZi5hZG1pbi52YWx1ZSwgIk9ubHkgYWRtaW4gY2FuIGFkZCByZXB1dGF0aW9uIgogICAgdHhuIFNlbmRlcgogICAgaW50Y18wIC8vIDAKICAgIGJ5dGVjXzEgLy8gImFkbWluIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmFkbWluIGV4aXN0cwogICAgPT0KICAgIGFzc2VydCAvLyBPbmx5IGFkbWluIGNhbiBhZGQgcmVwdXRhdGlvbgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTozNS0zNgogICAgLy8gIyBJbiBwcm9kdWN0aW9uLCBzdG9yZSBpbiBib3ggc3RvcmFnZSBwZXIgc3R1ZGVudAogICAgLy8gc2VsZi50b3RhbF9taW50ZWQudmFsdWUgPSBzZWxmLnRvdGFsX21pbnRlZC52YWx1ZSArIHBvaW50cwogICAgaW50Y18wIC8vIDAKICAgIGJ5dGVjXzAgLy8gInRvdGFsX21pbnRlZCIKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi50b3RhbF9taW50ZWQgZXhpc3RzCiAgICArCiAgICBieXRlY18wIC8vICJ0b3RhbF9taW50ZWQiCiAgICBzd2FwCiAgICBhcHBfZ2xvYmFsX3B1dAogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTozMAogICAgLy8gQGFiaW1ldGhvZCgpCiAgICBwdXNoYnl0ZXMgMHgxNTFmN2M3NTAwMTA1MjY1NzA3NTc0NjE3NDY5NmY2ZTIwNjE2NDY0NjU2NAogICAgbG9nCiAgICBpbnRjXzEgLy8gMQogICAgcmV0dXJuCgoKLy8gc21hcnRfY29udHJhY3RzLmh1c3RsZV9zY29yZS5jb250cmFjdC5IdXN0bGVTY29yZS5yZW1vdmVfcmVwdXRhdGlvbltyb3V0aW5nXSgpIC0+IHZvaWQ6CnJlbW92ZV9yZXB1dGF0aW9uOgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo0MAogICAgLy8gQGFiaW1ldGhvZCgpCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBsZW4KICAgIGludGNfMiAvLyAzMgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5zdGF0aWNfYXJyYXk8YXJjNC51aW50OCwgMzI+CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBsZW4KICAgIGludGNfMyAvLyA4CiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LnVpbnQ2NAogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo0MwogICAgLy8gYXNzZXJ0IFR4bi5zZW5kZXIgPT0gc2VsZi5hZG1pbi52YWx1ZSwgIk9ubHkgYWRtaW4gY2FuIHJlbW92ZSByZXB1dGF0aW9uIgogICAgdHhuIFNlbmRlcgogICAgaW50Y18wIC8vIDAKICAgIGJ5dGVjXzEgLy8gImFkbWluIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmFkbWluIGV4aXN0cwogICAgPT0KICAgIGFzc2VydCAvLyBPbmx5IGFkbWluIGNhbiByZW1vdmUgcmVwdXRhdGlvbgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo0MAogICAgLy8gQGFiaW1ldGhvZCgpCiAgICBwdXNoYnl0ZXMgMHgxNTFmN2M3NTAwMTI1MjY1NzA3NTc0NjE3NDY5NmY2ZTIwNzI2NTZkNmY3NjY1NjQKICAgIGxvZwogICAgaW50Y18xIC8vIDEKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5odXN0bGVfc2NvcmUuY29udHJhY3QuSHVzdGxlU2NvcmUuZ2V0X3RvdGFsX21pbnRlZFtyb3V0aW5nXSgpIC0+IHZvaWQ6CmdldF90b3RhbF9taW50ZWQ6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjUwCiAgICAvLyByZXR1cm4gc2VsZi50b3RhbF9taW50ZWQudmFsdWUKICAgIGludGNfMCAvLyAwCiAgICBieXRlY18wIC8vICJ0b3RhbF9taW50ZWQiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudG90YWxfbWludGVkIGV4aXN0cwogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo0NwogICAgLy8gQGFiaW1ldGhvZChyZWFkb25seT1UcnVlKQogICAgaXRvYgogICAgYnl0ZWNfMiAvLyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50Y18xIC8vIDEKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5odXN0bGVfc2NvcmUuY29udHJhY3QuSHVzdGxlU2NvcmUuZ2V0X2FkbWluW3JvdXRpbmddKCkgLT4gdm9pZDoKZ2V0X2FkbWluOgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo1NQogICAgLy8gcmV0dXJuIHNlbGYuYWRtaW4udmFsdWUKICAgIGludGNfMCAvLyAwCiAgICBieXRlY18xIC8vICJhZG1pbiIKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5hZG1pbiBleGlzdHMKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6NTIKICAgIC8vIEBhYmltZXRob2QocmVhZG9ubHk9VHJ1ZSkKICAgIGJ5dGVjXzIgLy8gMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludGNfMSAvLyAxCiAgICByZXR1cm4K", "clear": "I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuY2xlYXJfc3RhdGVfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIHB1c2hpbnQgMQogICAgcmV0dXJuCg=="}, "sourceInfo": {"approval": {"pcOffsetMethod": "none", "sourceInfo": [{"pc": [168], "errorMessage": "Only admin can add reputation"}, {"pc": [225], "errorMessage": "Only admin can remove reputation"}, {"pc": [166, 223, 269], "errorMessage": "check self.admin exists"}, {"pc": [172, 258], "errorMessage": "check self.total_minted exists"}, {"pc": [151, 210], "errorMessage": "invalid number of bytes for arc4.static_array<arc4.uint8, 32>"}, {"pc": [159, 217], "errorMessage": "invalid number of bytes for arc4.uint64"}]}, "clear": {"pcOffsetMethod": "none", "sourceInfo": []}}, "templateVariables": {}}"""
+_APP_SPEC_JSON = r"""{"arcs": [22, 28], "bareActions": {"call": ["DeleteApplication", "NoOp", "UpdateApplication"], "create": ["DeleteApplication", "NoOp"]}, "methods": [{"actions": {"call": [], "create": ["NoOp"]}, "args": [], "name": "create", "returns": {"type": "string"}, "desc": "Initialize the contract with creator as admin.", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "address", "name": "student"}], "name": "mint_initial", "returns": {"type": "string"}, "desc": "Initialize a student with 0 score (creates box storage).", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "address", "name": "student"}, {"type": "uint64", "name": "points"}], "name": "add_reputation", "returns": {"type": "string"}, "desc": "Add reputation points to a student (admin only).", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "address", "name": "student"}], "name": "get_score", "returns": {"type": "uint64"}, "desc": "Get reputation score for a student.", "events": [], "readonly": true, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_admin", "returns": {"type": "address"}, "desc": "Get the admin address.", "events": [], "readonly": true, "recommendations": {}}], "name": "HustleScore", "state": {"keys": {"box": {}, "global": {"admin": {"key": "YWRtaW4=", "keyType": "AVMString", "valueType": "address"}}, "local": {}}, "maps": {"box": {"scores": {"keyType": "address", "valueType": "uint64", "prefix": "c2NvcmVz"}}, "global": {}, "local": {}}, "schema": {"global": {"bytes": 1, "ints": 0}, "local": {"bytes": 0, "ints": 0}}}, "structs": {}, "byteCode": {"approval": "CyADAQAgJgMFYWRtaW4Gc2NvcmVzBBUffHUxG0EAOzEZFEQxGEEAJIIEBHYs6PsEfU0wrQQgW3IMBDRrPbw2GgCOBABHAI4A0QDvAIAE1uhxTTYaAI4BAA8AIjEZkIExGkQoMQBnIkMoMQBngCEVH3x1ABtIdXN0bGVTY29yZSBTQlQgaW5pdGlhbGl6ZWSwIkM2GgFJFSQSRDEAIyhlRBJEKUxQSb5IFxREIxa/gCYVH3x1ACBTdHVkZW50IGluaXRpYWxpemVkIHdpdGggMCBzY29yZbAiQzYaAUkVJBJENhoCSRWBCBJEFzEAIyhlRBJEKU8CUEm+TBdETwIIFr+AFhUffHUAEFJlcHV0YXRpb24gYWRkZWSwIkM2GgFJFSQSRClMUL5MF0AACCMWKkxQsCJDSRZC//UjKGVEKkxQsCJD", "clear": "C4EBQw=="}, "desc": "\n    Hustle Score SBT for CampusNexus\n    \n    Features:\n    - Non-transferable (soulbound)\n    - Per-student score stored in BoxMap\n    - Score increases with completed projects\n    - Admin-managed score updates\n    ", "events": [], "networks": {}, "source": {"approval": "I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuYXBwcm92YWxfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIGludGNibG9jayAxIDAgMzIKICAgIGJ5dGVjYmxvY2sgImFkbWluIiAic2NvcmVzIiAweDE1MWY3Yzc1CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjEwCiAgICAvLyBjbGFzcyBIdXN0bGVTY29yZShBUkM0Q29udHJhY3QpOgogICAgdHhuIE51bUFwcEFyZ3MKICAgIGJ6IG1haW5fYmFyZV9yb3V0aW5nQDE1CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBieiBtYWluX2NyZWF0ZV9Ob09wQDExCiAgICBwdXNoYnl0ZXNzIDB4NzYyY2U4ZmIgMHg3ZDRkMzBhZCAweDIwNWI3MjBjIDB4MzQ2YjNkYmMgLy8gbWV0aG9kICJtaW50X2luaXRpYWwoYWRkcmVzcylzdHJpbmciLCBtZXRob2QgImFkZF9yZXB1dGF0aW9uKGFkZHJlc3MsdWludDY0KXN0cmluZyIsIG1ldGhvZCAiZ2V0X3Njb3JlKGFkZHJlc3MpdWludDY0IiwgbWV0aG9kICJnZXRfYWRtaW4oKWFkZHJlc3MiCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBtaW50X2luaXRpYWwgYWRkX3JlcHV0YXRpb24gZ2V0X3Njb3JlIGdldF9hZG1pbgogICAgZXJyCgptYWluX2NyZWF0ZV9Ob09wQDExOgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weToxMAogICAgLy8gY2xhc3MgSHVzdGxlU2NvcmUoQVJDNENvbnRyYWN0KToKICAgIHB1c2hieXRlcyAweGQ2ZTg3MTRkIC8vIG1ldGhvZCAiY3JlYXRlKClzdHJpbmciCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBjcmVhdGUKICAgIGVycgoKbWFpbl9iYXJlX3JvdXRpbmdAMTU6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjMxCiAgICAvLyBAYmFyZW1ldGhvZChjcmVhdGU9ImFsbG93IiwgYWxsb3dfYWN0aW9ucz1bIk5vT3AiLCAiVXBkYXRlQXBwbGljYXRpb24iLCAiRGVsZXRlQXBwbGljYXRpb24iXSkKICAgIGludGNfMCAvLyAxCiAgICB0eG4gT25Db21wbGV0aW9uCiAgICBzaGwKICAgIHB1c2hpbnQgNDkKICAgICYKICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTozNC0zNgogICAgLy8gIyBEdXJpbmcgY3JlYXRpb24sIGFkbWluIGlzIHNldC4gRm9yIHVwZGF0ZS9kZWxldGUsIHdlIGFsbG93IChjb21tZW50ZWQgb3V0IGFkbWluIGNoZWNrIGZvciBub3cpCiAgICAvLyAjIE5vIGV4cGxpY2l0IGNoZWNrIG5lZWRlZCAtIGFsZ29weSByb3V0aW5nIGhhbmRsZXMgQXBwbGljYXRpb25JRCBzZW1hbnRpY3MKICAgIC8vIHNlbGYuYWRtaW4udmFsdWUgPSBUeG4uc2VuZGVyCiAgICBieXRlY18wIC8vICJhZG1pbiIKICAgIHR4biBTZW5kZXIKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjMxCiAgICAvLyBAYmFyZW1ldGhvZChjcmVhdGU9ImFsbG93IiwgYWxsb3dfYWN0aW9ucz1bIk5vT3AiLCAiVXBkYXRlQXBwbGljYXRpb24iLCAiRGVsZXRlQXBwbGljYXRpb24iXSkKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMuaHVzdGxlX3Njb3JlLmNvbnRyYWN0Lkh1c3RsZVNjb3JlLmNyZWF0ZVtyb3V0aW5nXSgpIC0+IHZvaWQ6CmNyZWF0ZToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6MjgKICAgIC8vIHNlbGYuYWRtaW4udmFsdWUgPSBUeG4uc2VuZGVyCiAgICBieXRlY18wIC8vICJhZG1pbiIKICAgIHR4biBTZW5kZXIKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjI1CiAgICAvLyBAYWJpbWV0aG9kKGNyZWF0ZT0icmVxdWlyZSIpCiAgICBwdXNoYnl0ZXMgMHgxNTFmN2M3NTAwMWI0ODc1NzM3NDZjNjU1MzYzNmY3MjY1MjA1MzQyNTQyMDY5NmU2OTc0Njk2MTZjNjk3YTY1NjQKICAgIGxvZwogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5odXN0bGVfc2NvcmUuY29udHJhY3QuSHVzdGxlU2NvcmUubWludF9pbml0aWFsW3JvdXRpbmddKCkgLT4gdm9pZDoKbWludF9pbml0aWFsOgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTozOAogICAgLy8gQGFiaW1ldGhvZCgpCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDMyCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LnN0YXRpY19hcnJheTxhcmM0LnVpbnQ4LCAzMj4KICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6NDEKICAgIC8vIGFzc2VydCBUeG4uc2VuZGVyID09IHNlbGYuYWRtaW4udmFsdWUsICJPbmx5IGFkbWluIGNhbiBtaW50IgogICAgdHhuIFNlbmRlcgogICAgaW50Y18xIC8vIDAKICAgIGJ5dGVjXzAgLy8gImFkbWluIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmFkbWluIGV4aXN0cwogICAgPT0KICAgIGFzc2VydCAvLyBPbmx5IGFkbWluIGNhbiBtaW50CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjQzLTQ0CiAgICAvLyAjIENoZWNrIGlmIGFscmVhZHkgZXhpc3RzCiAgICAvLyBleGlzdHMsIF92YWwgPSBzZWxmLnNjb3Jlcy5tYXliZShzdHVkZW50KQogICAgYnl0ZWNfMSAvLyAic2NvcmVzIgogICAgc3dhcAogICAgY29uY2F0CiAgICBkdXAKICAgIGJveF9nZXQKICAgIHBvcAogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo0NQogICAgLy8gYXNzZXJ0IG5vdCBleGlzdHMsICJTdHVkZW50IGFscmVhZHkgaW5pdGlhbGl6ZWQiCiAgICAhCiAgICBhc3NlcnQgLy8gU3R1ZGVudCBhbHJlYWR5IGluaXRpYWxpemVkCiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjQ3LTQ4CiAgICAvLyAjIEluaXRpYWxpemUgd2l0aCAwCiAgICAvLyBzZWxmLnNjb3Jlc1tzdHVkZW50XSA9IFVJbnQ2NCgwKQogICAgaW50Y18xIC8vIDAKICAgIGl0b2IKICAgIGJveF9wdXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6MzgKICAgIC8vIEBhYmltZXRob2QoKQogICAgcHVzaGJ5dGVzIDB4MTUxZjdjNzUwMDIwNTM3NDc1NjQ2NTZlNzQyMDY5NmU2OTc0Njk2MTZjNjk3YTY1NjQyMDc3Njk3NDY4MjAzMDIwNzM2MzZmNzI2NQogICAgbG9nCiAgICBpbnRjXzAgLy8gMQogICAgcmV0dXJuCgoKLy8gc21hcnRfY29udHJhY3RzLmh1c3RsZV9zY29yZS5jb250cmFjdC5IdXN0bGVTY29yZS5hZGRfcmVwdXRhdGlvbltyb3V0aW5nXSgpIC0+IHZvaWQ6CmFkZF9yZXB1dGF0aW9uOgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo1MgogICAgLy8gQGFiaW1ldGhvZCgpCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDMyCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LnN0YXRpY19hcnJheTxhcmM0LnVpbnQ4LCAzMj4KICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDIKICAgIGR1cAogICAgbGVuCiAgICBwdXNoaW50IDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjU1CiAgICAvLyBhc3NlcnQgVHhuLnNlbmRlciA9PSBzZWxmLmFkbWluLnZhbHVlLCAiT25seSBhZG1pbiBjYW4gYWRkIHJlcHV0YXRpb24iCiAgICB0eG4gU2VuZGVyCiAgICBpbnRjXzEgLy8gMAogICAgYnl0ZWNfMCAvLyAiYWRtaW4iCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuYWRtaW4gZXhpc3RzCiAgICA9PQogICAgYXNzZXJ0IC8vIE9ubHkgYWRtaW4gY2FuIGFkZCByZXB1dGF0aW9uCiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjU3LTU4CiAgICAvLyAjIEVuc3VyZSBzdHVkZW50IGlzIGluaXRpYWxpemVkCiAgICAvLyBleGlzdHMsIGN1cnJlbnRfc2NvcmUgPSBzZWxmLnNjb3Jlcy5tYXliZShzdHVkZW50KQogICAgYnl0ZWNfMSAvLyAic2NvcmVzIgogICAgdW5jb3ZlciAyCiAgICBjb25jYXQKICAgIGR1cAogICAgYm94X2dldAogICAgc3dhcAogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo1OQogICAgLy8gYXNzZXJ0IGV4aXN0cywgIlN0dWRlbnQgbm90IGluaXRpYWxpemVkIgogICAgYXNzZXJ0IC8vIFN0dWRlbnQgbm90IGluaXRpYWxpemVkCiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjYxLTYyCiAgICAvLyAjIFVwZGF0ZSBzY29yZQogICAgLy8gc2VsZi5zY29yZXNbc3R1ZGVudF0gPSBjdXJyZW50X3Njb3JlICsgcG9pbnRzCiAgICB1bmNvdmVyIDIKICAgICsKICAgIGl0b2IKICAgIGJveF9wdXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6NTIKICAgIC8vIEBhYmltZXRob2QoKQogICAgcHVzaGJ5dGVzIDB4MTUxZjdjNzUwMDEwNTI2NTcwNzU3NDYxNzQ2OTZmNmUyMDYxNjQ2NDY1NjQKICAgIGxvZwogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5odXN0bGVfc2NvcmUuY29udHJhY3QuSHVzdGxlU2NvcmUuZ2V0X3Njb3JlW3JvdXRpbmddKCkgLT4gdm9pZDoKZ2V0X3Njb3JlOgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo2NgogICAgLy8gQGFiaW1ldGhvZChyZWFkb25seT1UcnVlKQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBsZW4KICAgIGludGNfMiAvLyAzMgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5zdGF0aWNfYXJyYXk8YXJjNC51aW50OCwgMzI+CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjY5CiAgICAvLyBleGlzdHMsIHNjb3JlID0gc2VsZi5zY29yZXMubWF5YmUoc3R1ZGVudCkKICAgIGJ5dGVjXzEgLy8gInNjb3JlcyIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgYm94X2dldAogICAgc3dhcAogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo3MAogICAgLy8gaWYgbm90IGV4aXN0czoKICAgIGJueiBnZXRfc2NvcmVfYWZ0ZXJfaWZfZWxzZUAzCiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjcxCiAgICAvLyByZXR1cm4gQVJDNFVJbnQ2NChVSW50NjQoMCkpCiAgICBpbnRjXzEgLy8gMAogICAgaXRvYgoKZ2V0X3Njb3JlX2FmdGVyX2lubGluZWRfc21hcnRfY29udHJhY3RzLmh1c3RsZV9zY29yZS5jb250cmFjdC5IdXN0bGVTY29yZS5nZXRfc2NvcmVANDoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9odXN0bGVfc2NvcmUvY29udHJhY3QucHk6NjYKICAgIC8vIEBhYmltZXRob2QocmVhZG9ubHk9VHJ1ZSkKICAgIGJ5dGVjXzIgLy8gMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCmdldF9zY29yZV9hZnRlcl9pZl9lbHNlQDM6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5OjczCiAgICAvLyByZXR1cm4gQVJDNFVJbnQ2NChzY29yZSkKICAgIGR1cAogICAgaXRvYgogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo2NgogICAgLy8gQGFiaW1ldGhvZChyZWFkb25seT1UcnVlKQogICAgYiBnZXRfc2NvcmVfYWZ0ZXJfaW5saW5lZF9zbWFydF9jb250cmFjdHMuaHVzdGxlX3Njb3JlLmNvbnRyYWN0Lkh1c3RsZVNjb3JlLmdldF9zY29yZUA0CgoKLy8gc21hcnRfY29udHJhY3RzLmh1c3RsZV9zY29yZS5jb250cmFjdC5IdXN0bGVTY29yZS5nZXRfYWRtaW5bcm91dGluZ10oKSAtPiB2b2lkOgpnZXRfYWRtaW46CiAgICAvLyBzbWFydF9jb250cmFjdHMvaHVzdGxlX3Njb3JlL2NvbnRyYWN0LnB5Ojc4CiAgICAvLyByZXR1cm4gc2VsZi5hZG1pbi52YWx1ZQogICAgaW50Y18xIC8vIDAKICAgIGJ5dGVjXzAgLy8gImFkbWluIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmFkbWluIGV4aXN0cwogICAgLy8gc21hcnRfY29udHJhY3RzL2h1c3RsZV9zY29yZS9jb250cmFjdC5weTo3NQogICAgLy8gQGFiaW1ldGhvZChyZWFkb25seT1UcnVlKQogICAgYnl0ZWNfMiAvLyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgo=", "clear": "I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuY2xlYXJfc3RhdGVfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIHB1c2hpbnQgMQogICAgcmV0dXJuCg=="}, "sourceInfo": {"approval": {"pcOffsetMethod": "none", "sourceInfo": [{"pc": [242], "errorMessage": "Only admin can add reputation"}, {"pc": [161], "errorMessage": "Only admin can mint"}, {"pc": [170], "errorMessage": "Student already initialized"}, {"pc": [251], "errorMessage": "Student not initialized"}, {"pc": [159, 240, 317], "errorMessage": "check self.admin exists"}, {"pc": [153, 224, 291], "errorMessage": "invalid number of bytes for arc4.static_array<arc4.uint8, 32>"}, {"pc": [233], "errorMessage": "invalid number of bytes for arc4.uint64"}]}, "clear": {"pcOffsetMethod": "none", "sourceInfo": []}}, "templateVariables": {}}"""
 APP_SPEC = algokit_utils.Arc56Contract.from_json(_APP_SPEC_JSON)
 
 def _parse_abi_args(args: object | None = None) -> list[object] | None:
@@ -65,6 +65,15 @@ def _init_dataclass(cls: type, data: dict) -> object:
     return cls(**field_values)
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
+class MintInitialArgs:
+    """Dataclass for mint_initial arguments"""
+    student: str
+
+    @property
+    def abi_method_signature(self) -> str:
+        return "mint_initial(address)string"
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class AddReputationArgs:
     """Dataclass for add_reputation arguments"""
     student: str
@@ -75,19 +84,59 @@ class AddReputationArgs:
         return "add_reputation(address,uint64)string"
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class RemoveReputationArgs:
-    """Dataclass for remove_reputation arguments"""
+class GetScoreArgs:
+    """Dataclass for get_score arguments"""
     student: str
-    points: int
 
     @property
     def abi_method_signature(self) -> str:
-        return "remove_reputation(address,uint64)string"
+        return "get_score(address)uint64"
+
+
+class _HustleScoreUpdate:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+
+    def bare(
+        self, params: algokit_utils.AppClientBareCallParams | None = None
+    ) -> algokit_utils.AppUpdateParams:
+        return self.app_client.params.bare.update(params)
+
+
+class _HustleScoreDelete:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+
+    def bare(
+        self, params: algokit_utils.AppClientBareCallParams | None = None
+    ) -> algokit_utils.AppCallParams:
+        return self.app_client.params.bare.delete(params)
 
 
 class HustleScoreParams:
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
+
+    @property
+    def update(self) -> "_HustleScoreUpdate":
+        return _HustleScoreUpdate(self.app_client)
+
+    @property
+    def delete(self) -> "_HustleScoreDelete":
+        return _HustleScoreDelete(self.app_client)
+
+    def mint_initial(
+        self,
+        args: tuple[str] | MintInitialArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "mint_initial(address)string",
+            "args": method_args,
+        }))
 
     def add_reputation(
         self,
@@ -102,28 +151,17 @@ class HustleScoreParams:
             "args": method_args,
         }))
 
-    def remove_reputation(
+    def get_score(
         self,
-        args: tuple[str, int] | RemoveReputationArgs,
+        args: tuple[str] | GetScoreArgs,
         params: algokit_utils.CommonAppCallParams | None = None
     ) -> algokit_utils.AppCallMethodCallParams:
         method_args = _parse_abi_args(args)
         params = params or algokit_utils.CommonAppCallParams()
         return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
             **dataclasses.asdict(params),
-            "method": "remove_reputation(address,uint64)string",
+            "method": "get_score(address)uint64",
             "args": method_args,
-        }))
-
-    def get_total_minted(
-        self,
-        params: algokit_utils.CommonAppCallParams | None = None
-    ) -> algokit_utils.AppCallMethodCallParams:
-    
-        params = params or algokit_utils.CommonAppCallParams()
-        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
-            **dataclasses.asdict(params),
-            "method": "get_total_minted()uint64",
         }))
 
     def get_admin(
@@ -159,9 +197,46 @@ class HustleScoreParams:
         )
 
 
+class _HustleScoreUpdateTransaction:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+
+    def bare(self, params: algokit_utils.AppClientBareCallParams | None = None) -> Transaction:
+        return self.app_client.create_transaction.bare.update(params)
+
+
+class _HustleScoreDeleteTransaction:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+
+    def bare(self, params: algokit_utils.AppClientBareCallParams | None = None) -> Transaction:
+        return self.app_client.create_transaction.bare.delete(params)
+
+
 class HustleScoreCreateTransactionParams:
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
+
+    @property
+    def update(self) -> "_HustleScoreUpdateTransaction":
+        return _HustleScoreUpdateTransaction(self.app_client)
+
+    @property
+    def delete(self) -> "_HustleScoreDeleteTransaction":
+        return _HustleScoreDeleteTransaction(self.app_client)
+
+    def mint_initial(
+        self,
+        args: tuple[str] | MintInitialArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "mint_initial(address)string",
+            "args": method_args,
+        }))
 
     def add_reputation(
         self,
@@ -176,28 +251,17 @@ class HustleScoreCreateTransactionParams:
             "args": method_args,
         }))
 
-    def remove_reputation(
+    def get_score(
         self,
-        args: tuple[str, int] | RemoveReputationArgs,
+        args: tuple[str] | GetScoreArgs,
         params: algokit_utils.CommonAppCallParams | None = None
     ) -> algokit_utils.BuiltTransactions:
         method_args = _parse_abi_args(args)
         params = params or algokit_utils.CommonAppCallParams()
         return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
             **dataclasses.asdict(params),
-            "method": "remove_reputation(address,uint64)string",
+            "method": "get_score(address)uint64",
             "args": method_args,
-        }))
-
-    def get_total_minted(
-        self,
-        params: algokit_utils.CommonAppCallParams | None = None
-    ) -> algokit_utils.BuiltTransactions:
-    
-        params = params or algokit_utils.CommonAppCallParams()
-        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
-            **dataclasses.asdict(params),
-            "method": "get_total_minted()uint64",
         }))
 
     def get_admin(
@@ -233,9 +297,67 @@ class HustleScoreCreateTransactionParams:
         )
 
 
+class _HustleScoreUpdateSend:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+
+    def bare(
+        self,
+        params: algokit_utils.AppClientBareCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult:
+        return self.app_client.send.bare.update(
+            params=params,
+            send_params=send_params,
+            compilation_params=compilation_params
+        )
+
+
+class _HustleScoreDeleteSend:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+
+    def bare(
+        self,
+        params: algokit_utils.AppClientBareCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None,
+        
+    ) -> algokit_utils.SendAppTransactionResult:
+        return self.app_client.send.bare.delete(
+            params=params,
+            send_params=send_params,
+            
+        )
+
+
 class HustleScoreSend:
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
+
+    @property
+    def update(self) -> "_HustleScoreUpdateSend":
+        return _HustleScoreUpdateSend(self.app_client)
+
+    @property
+    def delete(self) -> "_HustleScoreDeleteSend":
+        return _HustleScoreDeleteSend(self.app_client)
+
+    def mint_initial(
+        self,
+        args: tuple[str] | MintInitialArgs,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[str]:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "mint_initial(address)string",
+            "args": method_args,
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
 
     def add_reputation(
         self,
@@ -253,32 +375,18 @@ class HustleScoreSend:
         parsed_response = response
         return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
 
-    def remove_reputation(
+    def get_score(
         self,
-        args: tuple[str, int] | RemoveReputationArgs,
+        args: tuple[str] | GetScoreArgs,
         params: algokit_utils.CommonAppCallParams | None = None,
         send_params: algokit_utils.SendParams | None = None
-    ) -> algokit_utils.SendAppTransactionResult[str]:
+    ) -> algokit_utils.SendAppTransactionResult[int]:
         method_args = _parse_abi_args(args)
         params = params or algokit_utils.CommonAppCallParams()
         response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
             **dataclasses.asdict(params),
-            "method": "remove_reputation(address,uint64)string",
+            "method": "get_score(address)uint64",
             "args": method_args,
-        }), send_params=send_params)
-        parsed_response = response
-        return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
-
-    def get_total_minted(
-        self,
-        params: algokit_utils.CommonAppCallParams | None = None,
-        send_params: algokit_utils.SendParams | None = None
-    ) -> algokit_utils.SendAppTransactionResult[int]:
-    
-        params = params or algokit_utils.CommonAppCallParams()
-        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
-            **dataclasses.asdict(params),
-            "method": "get_total_minted()uint64",
         }), send_params=send_params)
         parsed_response = response
         return typing.cast(algokit_utils.SendAppTransactionResult[int], parsed_response)
@@ -325,7 +433,6 @@ class HustleScoreSend:
 class GlobalStateValue(typing.TypedDict):
     """Shape of global_state state key values"""
     admin: str
-    total_minted: int
 
 class HustleScoreState:
     """Methods to access state for the current HustleScore app"""
@@ -339,6 +446,13 @@ class HustleScoreState:
     ) -> "_GlobalState":
             """Methods to access global_state for the current app"""
             return _GlobalState(self.app_client)
+
+    @property
+    def box(
+        self
+    ) -> "_BoxState":
+            """Methods to access box for the current app"""
+            return _BoxState(self.app_client)
 
 class _GlobalState:
     def __init__(self, app_client: algokit_utils.AppClient):
@@ -371,13 +485,72 @@ class _GlobalState:
             return _init_dataclass(self._struct_classes["address"], value)  # type: ignore
         return typing.cast(str, value)
 
+class _BoxState:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+        
+        # Pre-generated mapping of value types to their struct classes
+        self._struct_classes: dict[str, typing.Type[typing.Any]] = {}
+
+    def get_all(self) -> dict[str, typing.Any]:
+        """Get all current keyed values from box state"""
+        result = self.app_client.state.box.get_all()
+        if not result:
+            return {}
+
+        converted = {}
+        for key, value in result.items():
+            key_info = self.app_client.app_spec.state.keys.box.get(key)
+            struct_class = self._struct_classes.get(key_info.value_type) if key_info else None
+            converted[key] = (
+                _init_dataclass(struct_class, value) if struct_class and isinstance(value, dict)
+                else value
+            )
+        return converted
+
     @property
-    def total_minted(self) -> int:
-        """Get the current value of the total_minted key in global_state state"""
-        value = self.app_client.state.global_state.get_value("total_minted")
-        if isinstance(value, dict) and "AVMUint64" in self._struct_classes:
-            return _init_dataclass(self._struct_classes["AVMUint64"], value)  # type: ignore
-        return typing.cast(int, value)
+    def scores(self) -> "_MapState[str, int]":
+        """Get values from the scores map in box state"""
+        return _MapState(
+            self.app_client.state.box,
+            "scores",
+            None
+        )
+
+_KeyType = typing.TypeVar("_KeyType")
+_ValueType = typing.TypeVar("_ValueType")
+
+class _AppClientStateMethodsProtocol(typing.Protocol):
+    def get_map(self, map_name: str) -> dict[typing.Any, typing.Any]:
+        ...
+    def get_map_value(self, map_name: str, key: typing.Any) -> typing.Any | None:
+        ...
+
+class _MapState(typing.Generic[_KeyType, _ValueType]):
+    """Generic class for accessing state maps with strongly typed keys and values"""
+
+    def __init__(self, state_accessor: _AppClientStateMethodsProtocol, map_name: str,
+                struct_class: typing.Type[_ValueType] | None = None):
+        self._state_accessor = state_accessor
+        self._map_name = map_name
+        self._struct_class = struct_class
+
+    def get_map(self) -> dict[_KeyType, _ValueType]:
+        """Get all current values in the map"""
+        result = self._state_accessor.get_map(self._map_name)
+        if self._struct_class and result:
+            return {k: _init_dataclass(self._struct_class, v) if isinstance(v, dict) else v
+                    for k, v in result.items()}  # type: ignore
+        return typing.cast(dict[_KeyType, _ValueType], result or {})
+
+    def get_value(self, key: _KeyType) -> _ValueType | None:
+        """Get a value from the map by key"""
+        key_value = dataclasses.asdict(key) if dataclasses.is_dataclass(key) else key  # type: ignore
+        value = self._state_accessor.get_map_value(self._map_name, key_value)
+        if value is not None and self._struct_class and isinstance(value, dict):
+            return _init_dataclass(self._struct_class, value)  # type: ignore
+        return typing.cast(_ValueType | None, value)
+
 
 class HustleScoreClient:
     """Client for interacting with HustleScore smart contract"""
@@ -525,19 +698,19 @@ class HustleScoreClient:
     @typing.overload
     def decode_return_value(
         self,
+        method: typing.Literal["mint_initial(address)string"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> str | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
         method: typing.Literal["add_reputation(address,uint64)string"],
         return_value: algokit_utils.ABIReturn | None
     ) -> str | None: ...
     @typing.overload
     def decode_return_value(
         self,
-        method: typing.Literal["remove_reputation(address,uint64)string"],
-        return_value: algokit_utils.ABIReturn | None
-    ) -> str | None: ...
-    @typing.overload
-    def decode_return_value(
-        self,
-        method: typing.Literal["get_total_minted()uint64"],
+        method: typing.Literal["get_score(address)uint64"],
         return_value: algokit_utils.ABIReturn | None
     ) -> int | None: ...
     @typing.overload
@@ -603,7 +776,31 @@ class HustleScoreMethodCallCreateParams(
             }
         )
 
-class HustleScoreFactory(algokit_utils.TypedAppFactoryProtocol[HustleScoreMethodCallCreateParams, None, None]):
+@dataclasses.dataclass(frozen=True)
+class HustleScoreBareCallCreateParams(algokit_utils.AppClientBareCallCreateParams):
+    """Parameters for creating HustleScore contract with bare calls"""
+    on_complete: typing.Literal[OnComplete.DeleteApplicationOC, OnComplete.NoOpOC] | None = None
+
+    def to_algokit_utils_params(self) -> algokit_utils.AppClientBareCallCreateParams:
+        return algokit_utils.AppClientBareCallCreateParams(**self.__dict__)
+
+@dataclasses.dataclass(frozen=True)
+class HustleScoreBareCallUpdateParams(algokit_utils.AppClientBareCallParams):
+    """Parameters for calling HustleScore contract with bare calls"""
+    on_complete: typing.Literal[OnComplete.UpdateApplicationOC] | None = None
+
+    def to_algokit_utils_params(self) -> algokit_utils.AppClientBareCallParams:
+        return algokit_utils.AppClientBareCallParams(**self.__dict__)
+
+@dataclasses.dataclass(frozen=True)
+class HustleScoreBareCallDeleteParams(algokit_utils.AppClientBareCallParams):
+    """Parameters for calling HustleScore contract with bare calls"""
+    on_complete: typing.Literal[OnComplete.DeleteApplicationOC] | None = None
+
+    def to_algokit_utils_params(self) -> algokit_utils.AppClientBareCallParams:
+        return algokit_utils.AppClientBareCallParams(**self.__dict__)
+
+class HustleScoreFactory(algokit_utils.TypedAppFactoryProtocol[HustleScoreMethodCallCreateParams | HustleScoreBareCallCreateParams, HustleScoreBareCallUpdateParams, HustleScoreBareCallDeleteParams]):
     """Factory for deploying and managing HustleScoreClient smart contracts"""
 
     def __init__(
@@ -648,9 +845,9 @@ class HustleScoreFactory(algokit_utils.TypedAppFactoryProtocol[HustleScoreMethod
         *,
         on_update: algokit_utils.OnUpdate | None = None,
         on_schema_break: algokit_utils.OnSchemaBreak | None = None,
-        create_params: HustleScoreMethodCallCreateParams | None = None,
-        update_params: None = None,
-        delete_params: None = None,
+        create_params: HustleScoreMethodCallCreateParams | HustleScoreBareCallCreateParams | None = None,
+        update_params: HustleScoreBareCallUpdateParams | None = None,
+        delete_params: HustleScoreBareCallDeleteParams | None = None,
         existing_deployments: algokit_utils.ApplicationLookup | None = None,
         ignore_cache: bool = False,
         app_name: str | None = None,
@@ -662,8 +859,8 @@ class HustleScoreFactory(algokit_utils.TypedAppFactoryProtocol[HustleScoreMethod
             on_update=on_update,
             on_schema_break=on_schema_break,
             create_params=create_params.to_algokit_utils_params() if create_params else None,
-            update_params=update_params,
-            delete_params=delete_params,
+            update_params=update_params.to_algokit_utils_params() if update_params else None,
+            delete_params=delete_params.to_algokit_utils_params() if delete_params else None,
             existing_deployments=existing_deployments,
             ignore_cache=ignore_cache,
             app_name=app_name,
@@ -747,6 +944,26 @@ class HustleScoreFactoryCreateParams:
             algokit_utils.AppFactoryCreateParams(**dataclasses.asdict(params)),
             compilation_params=compilation_params)
 
+    def mint_initial(
+        self,
+        args: tuple[str] | MintInitialArgs,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the mint_initial(address)string ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "mint_initial(address)string",
+                "args": _parse_abi_args(args),
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
     def add_reputation(
         self,
         args: tuple[str, int] | AddReputationArgs,
@@ -767,40 +984,21 @@ class HustleScoreFactoryCreateParams:
             compilation_params=compilation_params
         )
 
-    def remove_reputation(
+    def get_score(
         self,
-        args: tuple[str, int] | RemoveReputationArgs,
+        args: tuple[str] | GetScoreArgs,
         *,
         params: algokit_utils.CommonAppCallCreateParams | None = None,
         compilation_params: algokit_utils.AppClientCompilationParams | None = None
     ) -> algokit_utils.AppCreateMethodCallParams:
-        """Creates a new instance using the remove_reputation(address,uint64)string ABI method"""
+        """Creates a new instance using the get_score(address)uint64 ABI method"""
         params = params or algokit_utils.CommonAppCallCreateParams()
         return self.app_factory.params.create(
             algokit_utils.AppFactoryCreateMethodCallParams(
                 **{
                 **dataclasses.asdict(params),
-                "method": "remove_reputation(address,uint64)string",
+                "method": "get_score(address)uint64",
                 "args": _parse_abi_args(args),
-                }
-            ),
-            compilation_params=compilation_params
-        )
-
-    def get_total_minted(
-        self,
-        *,
-        params: algokit_utils.CommonAppCallCreateParams | None = None,
-        compilation_params: algokit_utils.AppClientCompilationParams | None = None
-    ) -> algokit_utils.AppCreateMethodCallParams:
-        """Creates a new instance using the get_total_minted()uint64 ABI method"""
-        params = params or algokit_utils.CommonAppCallCreateParams()
-        return self.app_factory.params.create(
-            algokit_utils.AppFactoryCreateMethodCallParams(
-                **{
-                **dataclasses.asdict(params),
-                "method": "get_total_minted()uint64",
-                "args": None,
                 }
             ),
             compilation_params=compilation_params
@@ -974,6 +1172,16 @@ class HustleScoreFactorySendCreate:
             )
 
 
+class _HustleScoreUpdateComposer:
+    def __init__(self, composer: "HustleScoreComposer"):
+        self.composer = composer
+
+
+class _HustleScoreDeleteComposer:
+    def __init__(self, composer: "HustleScoreComposer"):
+        self.composer = composer
+
+
 class HustleScoreComposer:
     """Composer for creating transaction groups for HustleScore contract calls"""
 
@@ -981,6 +1189,32 @@ class HustleScoreComposer:
         self.client = client
         self._composer = client.algorand.new_group()
         self._result_mappers: list[typing.Callable[[algokit_utils.ABIReturn | None], object] | None] = []
+
+    @property
+    def update(self) -> "_HustleScoreUpdateComposer":
+        return _HustleScoreUpdateComposer(self)
+
+    @property
+    def delete(self) -> "_HustleScoreDeleteComposer":
+        return _HustleScoreDeleteComposer(self)
+
+    def mint_initial(
+        self,
+        args: tuple[str] | MintInitialArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "HustleScoreComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.mint_initial(
+                args=args,
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "mint_initial(address)string", v
+            )
+        )
+        return self
 
     def add_reputation(
         self,
@@ -1000,37 +1234,20 @@ class HustleScoreComposer:
         )
         return self
 
-    def remove_reputation(
+    def get_score(
         self,
-        args: tuple[str, int] | RemoveReputationArgs,
+        args: tuple[str] | GetScoreArgs,
         params: algokit_utils.CommonAppCallParams | None = None
     ) -> "HustleScoreComposer":
         self._composer.add_app_call_method_call(
-            self.client.params.remove_reputation(
+            self.client.params.get_score(
                 args=args,
                 params=params,
             )
         )
         self._result_mappers.append(
             lambda v: self.client.decode_return_value(
-                "remove_reputation(address,uint64)string", v
-            )
-        )
-        return self
-
-    def get_total_minted(
-        self,
-        params: algokit_utils.CommonAppCallParams | None = None
-    ) -> "HustleScoreComposer":
-        self._composer.add_app_call_method_call(
-            self.client.params.get_total_minted(
-                
-                params=params,
-            )
-        )
-        self._result_mappers.append(
-            lambda v: self.client.decode_return_value(
-                "get_total_minted()uint64", v
+                "get_score(address)uint64", v
             )
         )
         return self

@@ -4,12 +4,14 @@
 import { useState, useEffect } from 'react';
 import { usePeraWallet } from '../../hooks/usePeraWallet';
 import { useAuth } from '../../hooks/useAuth';
+import { useHustleScore } from '../../hooks/useHustleScore';
 import { getAccountBalance } from '../../services/algorand';
 import { projectsService } from '../../services/projects';
 
 export function Profile() {
     const { isConnected, accountAddress, connect, disconnect } = usePeraWallet();
     const { user } = useAuth();
+    const { score: hustleScore, loading: loadingScore, error: scoreError } = useHustleScore(accountAddress || user?.wallet_address);
     const [balance, setBalance] = useState(0);
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState('');
@@ -296,8 +298,12 @@ export function Profile() {
                     <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>ALGO Balance</p>
                 </div>
                 <div className="card-minimal" style={{ backgroundColor: 'var(--bg-secondary)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '2rem', fontWeight: 600 }}>100</p>
-                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Hustle Score</p>
+                    <p style={{ fontSize: '2rem', fontWeight: 600 }}>
+                        {loadingScore ? '...' : (scoreError ? '?' : hustleScore)}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
+                        Hustle Score {scoreError && <span title={scoreError}>⚠️</span>}
+                    </p>
                 </div>
                 <div className="card-minimal" style={{ backgroundColor: 'var(--bg-secondary)', textAlign: 'center' }}>
                     <p style={{ fontSize: '2rem', fontWeight: 600 }}>5★</p>

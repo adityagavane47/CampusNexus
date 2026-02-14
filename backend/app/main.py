@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import auth, feed, escrow, marketplace, ai, oauth, notifications
+from app.routers import auth, feed, escrow, marketplace, ai, oauth, notifications, hustle
 
 settings = get_settings()
 
@@ -43,6 +43,7 @@ app.include_router(escrow.router, prefix="/api/escrow", tags=["Escrow"])
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace"])
 app.include_router(ai.router, prefix="/api/ai", tags=["AI & Automation"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(hustle.router, tags=["Hustle Score"])  # New router
 
 
 @app.get("/", tags=["Health"])
