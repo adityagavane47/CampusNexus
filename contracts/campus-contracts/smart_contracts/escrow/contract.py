@@ -24,10 +24,10 @@ class MilestoneEscrow(ARC4Contract):
         self.released_amount = GlobalState(UInt64(0))
         self.status = GlobalState(UInt64(0))  # 0=inactive, 1=active, 2=completed, 3=cancelled
 
-    @abimethod()
+    @abimethod(allow_actions=["NoOp", "OptIn"])
     def create_escrow(self, freelancer_addr: Account, amount: UInt64) -> String:
-        """Create a new escrow contract."""
-        assert self.status.value == UInt64(0), "Escrow already exists"
+        """Initialize the escrow contract (can be called during creation or as NoOp)."""
+        assert self.status.value == UInt64(0), "Escrow already initialized"
         
         self.client.value = Txn.sender
         self.freelancer.value = freelancer_addr
@@ -35,7 +35,7 @@ class MilestoneEscrow(ARC4Contract):
         self.released_amount.value = UInt64(0)
         self.status.value = UInt64(1)
         
-        return String("Escrow created successfully")
+        return String("Escrow initialized successfully")
 
     @abimethod()
     def fund_escrow(self) -> String:

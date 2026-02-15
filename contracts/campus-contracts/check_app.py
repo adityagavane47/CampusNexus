@@ -19,8 +19,7 @@ def main():
         global_state = algorand.app.get_global_state(app_id)
         logger.info(f"Global State: {global_state}")
              
-        # Decode logic (if needed, but assuming algorand client decodes)
-        # If keys are strings "admin", check value.
+       
         admin_value = global_state.get('admin')
         logger.info(f"Admin Value: {admin_value}")
              

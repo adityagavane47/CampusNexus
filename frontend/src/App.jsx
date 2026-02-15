@@ -154,44 +154,46 @@ function App() {
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section style={{
-                padding: '80px 24px',
-                textAlign: 'center',
-                backgroundColor: 'var(--bg-secondary)',
-                borderBottom: '1px solid var(--border-light)',
-            }}>
-                <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-                    <h2 style={{
-                        fontSize: '2.5rem',
-                        fontWeight: 600,
-                        marginBottom: '16px',
-                        letterSpacing: '-0.03em',
-                    }}>
-                        {activeTab === 'matcher' ? 'AI Skill Matching' : 'Discover Projects'}
-                    </h2>
-                    <p style={{
-                        fontSize: '1rem',
-                        color: 'var(--text-secondary)',
-                        marginBottom: '32px',
-                        lineHeight: 1.7,
-                    }}>
-                        {activeTab === 'matcher'
-                            ? 'Our AI analyzes your skills to find the perfect freelance opportunities for you.'
-                            : 'Find freelance opportunities, trade equipment, and build your on-chain reputation at VIT Pune.'
-                        }
-                    </p>
+            {/* Hero Section - Only show for feed and matcher tabs */}
+            {(activeTab === 'feed' || activeTab === 'matcher') && (
+                <section style={{
+                    padding: '80px 24px',
+                    textAlign: 'center',
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderBottom: '1px solid var(--border-light)',
+                }}>
+                    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                        <h2 style={{
+                            fontSize: '2.5rem',
+                            fontWeight: 600,
+                            marginBottom: '16px',
+                            letterSpacing: '-0.03em',
+                        }}>
+                            {activeTab === 'matcher' ? 'AI Skill Matching' : 'Discover Projects'}
+                        </h2>
+                        <p style={{
+                            fontSize: '1rem',
+                            color: 'var(--text-secondary)',
+                            marginBottom: '32px',
+                            lineHeight: 1.7,
+                        }}>
+                            {activeTab === 'matcher'
+                                ? 'Our AI analyzes your skills to find the perfect freelance opportunities for you.'
+                                : 'Find freelance opportunities, trade equipment, and build your on-chain reputation at VIT Pune.'
+                            }
+                        </p>
 
-                    {activeTab === 'feed' && (
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="btn-primary"
-                        >
-                            Post a Project
-                        </button>
-                    )}
-                </div>
-            </section>
+                        {activeTab === 'feed' && (
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="btn-primary"
+                            >
+                                Post a Project
+                            </button>
+                        )}
+                    </div>
+                </section>
+            )}
 
             {/* Main Content */}
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
