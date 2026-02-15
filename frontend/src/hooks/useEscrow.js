@@ -6,7 +6,7 @@ import { useState, useCallback } from 'react';
 import algosdk from 'algosdk';
 
 import {
-    createEscrowTransaction,
+    deployEscrowContract,
     fundEscrowTransaction,
     releasePaymentTransaction,
     getAlgodClient
@@ -17,7 +17,8 @@ export function useEscrow() {
     const [error, setError] = useState(null);
 
     /**
-     * Create a new escrow for a project
+     * Create and Fund a new escrow for a project
+     * Two-step process: 1. Deploy Contract, 2. Fund Contract
      */
     const createEscrow = useCallback(async (accountAddress, signer, freelancerAddress, totalAmountAlgo, numMilestones = 1) => {
         if (!accountAddress || !signer) {
@@ -29,28 +30,52 @@ export function useEscrow() {
         setError(null);
 
         try {
-            const txn = await createEscrowTransaction(
+            // STEP 1: Deploy Escrow Contract
+            console.log('Step 1: Deploying Escrow Contract...');
+            const deployTxn = await deployEscrowContract(
                 accountAddress,
                 freelancerAddress,
                 numMilestones,
                 totalAmountAlgo
             );
 
-            // Sign with Pera Wallet
-            const signedTxn = await signer(txn);
+            // Sign deployment
+            const signedDeployTxn = await signer([deployTxn]);
 
-            // Submit transaction
+            // Send deployment
             const client = getAlgodClient();
-            const { txId } = await client.sendRawTransaction(signedTxn).do();
+            const { txId: deployTxId } = await client.sendRawTransaction(signedDeployTxn).do();
 
             // Wait for confirmation
-            const result = await algosdk.waitForConfirmation(client, txId, 4);
+            const deployResult = await algosdk.waitForConfirmation(client, deployTxId, 4);
+            const appId = deployResult['application-index'];
+            console.log(`Escrow Contract Deployed! App ID: ${appId}`);
 
-            console.log('Escrow created:', result);
-            return result;
+            // STEP 2: Fund Escrow Contract
+            console.log('Step 2: Funding Escrow Contract...');
+            const fundTxns = await fundEscrowTransaction(
+                accountAddress,
+                appId,
+                totalAmountAlgo
+            );
+
+            // Sign funding
+            const signedFundTxns = await signer(fundTxns);
+
+            // Send funding
+            const { txId: fundTxId } = await client.sendRawTransaction(signedFundTxns).do();
+
+            // Wait for confirmation
+            await algosdk.waitForConfirmation(client, fundTxId, 4);
+            console.log('Escrow Contract Funded!');
+
+            return { applicationIndex: appId };
+
         } catch (err) {
             console.error('Create escrow error:', err);
-            setError(err.message || 'Failed to create escrow');
+            // Handle specific network mismatch error friendlier?
+            const msg = err.message || 'Failed to create escrow';
+            setError(msg);
             return null;
         } finally {
             setIsLoading(false);

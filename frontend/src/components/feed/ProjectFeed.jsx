@@ -116,15 +116,19 @@ export function ProjectFeed() {
         <div className="animate-fade-in">
             <div className="section-header">
                 <h2 className="section-title">Latest Opportunities</h2>
-                {user && (
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="btn-primary"
-                        style={{ padding: '8px 16px', fontSize: '0.875rem' }}
-                    >
-                        + Create Project
-                    </button>
-                )}
+                <button
+                    onClick={() => {
+                        if (!user) {
+                            alert('Please log in to create a project');
+                            return;
+                        }
+                        setIsModalOpen(true);
+                    }}
+                    className="btn-primary"
+                    style={{ padding: '8px 16px', fontSize: '0.875rem' }}
+                >
+                    + Create Project
+                </button>
             </div>
 
             <div style={{ marginBottom: '24px' }}>
@@ -194,14 +198,104 @@ export function ProjectFeed() {
                                         <p style={{ fontWeight: 500 }}>{project.applications?.length || 0}</p>
                                     </div>
                                 </div>
-                                <button
-                                    className="btn-primary"
-                                    style={{ width: '100%' }}
-                                    onClick={() => handleApply(project.id)}
-                                    disabled={user?.id === project.creator_id}
-                                >
-                                    {user?.id === project.creator_id ? 'Your Project' : 'Apply Now'}
-                                </button>
+
+                                {/* Show different views for creator vs applicant */}
+                                {user?.id === project.creator_id ? (
+                                    /* Creator View: Show Applicants */
+                                    <div>
+                                        {project.applications && project.applications.length > 0 ? (
+                                            <div>
+                                                <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '12px' }}>
+                                                    Applicants ({project.applications.length})
+                                                </p>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {project.applications.map((applicant, idx) => (
+                                                        <div key={idx} style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            padding: '8px',
+                                                            backgroundColor: 'var(--bg-secondary)',
+                                                            borderRadius: '4px'
+                                                        }}>
+                                                            <span style={{ fontSize: '0.875rem' }}>{applicant.user_name}</span>
+                                                            {project.status === 'open' && (
+                                                                <button
+                                                                    className="btn-primary"
+                                                                    style={{ padding: '4px 12px', fontSize: '0.75rem' }}
+                                                                    onClick={async () => {
+                                                                        if (!accountAddress) {
+                                                                            alert('Please connect your wallet first');
+                                                                            await connectWallet();
+                                                                            return;
+                                                                        }
+
+                                                                        if (window.confirm(`Hire ${applicant.user_name}? This will deploy a Smart Contract and lock ${project.budget_algo} ALGO.`)) {
+                                                                            try {
+                                                                                // 1. Deploy & Fund Escrow Contract
+                                                                                const escrowResult = await createEscrow(
+                                                                                    accountAddress,
+                                                                                    signTransaction,
+                                                                                    applicant.user_wallet || accountAddress,
+                                                                                    project.budget_algo,
+                                                                                    project.milestones?.length || 1
+                                                                                );
+
+                                                                                if (!escrowResult || !escrowResult.applicationIndex) {
+                                                                                    throw new Error('Failed to deploy escrow contract');
+                                                                                }
+
+                                                                                const escrowAppId = escrowResult.applicationIndex;
+
+                                                                                console.log('Creating hire record with escrow ID:', escrowAppId);
+
+                                                                                // Update backend with hire info
+                                                                                const response = await fetch(`http://localhost:8000/api/feed/${project.id}/hire`, {
+                                                                                    method: 'POST',
+                                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                                    body: JSON.stringify({
+                                                                                        freelancer_id: applicant.user_id,
+                                                                                        freelancer_wallet: applicant.user_wallet || accountAddress,
+                                                                                        escrow_app_id: escrowAppId
+                                                                                    })
+                                                                                });
+
+                                                                                if (!response.ok) {
+                                                                                    throw new Error('Failed to hire');
+                                                                                }
+
+                                                                                alert(`✅ Successfully hired ${applicant.user_name}!\n\nEscrow Contract Deployed: ${escrowAppId}\nFunds Locked: ${project.budget_algo} ALGO`);
+                                                                                loadProjects(); // Refresh
+                                                                            } catch (err) {
+                                                                                console.error('Hire error:', err);
+                                                                                alert('Failed to hire applicant: ' + err.message);
+                                                                            }
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    Hire & Fund
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                                                No applicants yet
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* Applicant View: Show Apply Button */
+                                    <button
+                                        className="btn-primary"
+                                        style={{ width: '100%' }}
+                                        onClick={() => handleApply(project.id)}
+                                    >
+                                        Apply Now
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

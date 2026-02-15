@@ -72,7 +72,6 @@ export function LoginPage() {
                 <div className="login-logo">
                     <div className="logo-icon">CN</div>
                     <h1>CampusNexus</h1>
-                    <p className="logo-subtitle">VIT Pune</p>
                 </div>
 
                 {/* Welcome Text */}

@@ -1,6 +1,6 @@
 """
 CampusNexus - FastAPI Main Application
-Decentralized LinkedIn & Marketplace for VIT Pune Students
+Decentralized LinkedIn & Marketplace for Campus Students
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,8 +43,7 @@ app.include_router(escrow.router, prefix="/api/escrow", tags=["Escrow"])
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace"])
 app.include_router(ai.router, prefix="/api/ai", tags=["AI & Automation"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
-app.include_router(hustle.router, tags=["Hustle Score"])  # New router
-
+app.include_router(hustle.router, tags=["Hustle Score"])  
 
 @app.get("/", tags=["Health"])
 async def root():

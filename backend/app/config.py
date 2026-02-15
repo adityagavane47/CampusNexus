@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60
     
     # College Information
-    college_name: str = "VIT Pune"
+    college_name: str = "CampusNexus"
     
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"

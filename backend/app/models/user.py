@@ -24,7 +24,7 @@ class User(BaseModel):
     last_login: datetime
     
     # College info
-    college: str = "VIT Pune"
+    college: str = ""
     age: Optional[int] = None
     year: Optional[str] = None
     branch: Optional[str] = None

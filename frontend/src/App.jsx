@@ -97,7 +97,6 @@ function App() {
                         </div>
                         <div>
                             <h1 style={{ fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>CampusNexus</h1>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>VIT Pune</p>
                         </div>
                     </div>
 
@@ -179,7 +178,7 @@ function App() {
                         }}>
                             {activeTab === 'matcher'
                                 ? 'Our AI analyzes your skills to find the perfect freelance opportunities for you.'
-                                : 'Find freelance opportunities, trade equipment, and build your on-chain reputation at VIT Pune.'
+                                : 'Find freelance opportunities, trade equipment, and build your on-chain reputation.'
                             }
                         </p>
 

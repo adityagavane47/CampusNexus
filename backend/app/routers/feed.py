@@ -11,7 +11,8 @@ from app.utils.database import (
     create_project,
     get_all_projects,
     get_project_by_id,
-    apply_to_project
+    apply_to_project,
+    hire_freelancer
 )
 
 router = APIRouter()
@@ -116,5 +117,33 @@ async def apply_to_project_endpoint(project_id: int, request: ApplicationRequest
         "message": "Application submitted successfully",
         "project_id": project_id,
         "applications_count": len(project.get("applications", []))
+    }
+
+
+class HireRequest(BaseModel):
+    """Request model for hiring a freelancer."""
+    freelancer_id: str
+    freelancer_wallet: str
+    escrow_app_id: int
+
+
+@router.post("/{project_id}/hire")
+async def hire_applicant(project_id: int, request: HireRequest):
+    """Hire a freelancer and activate escrow for a project."""
+    project = hire_freelancer(
+        project_id,
+        request.freelancer_id,
+        request.escrow_app_id,
+        request.freelancer_wallet
+    )
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    return {
+        "message": "Freelancer hired successfully",
+        "project_id": project_id,
+        "status": project.get("status"),
+        "escrow_app_id": project.get("escrow_app_id")
     }
 

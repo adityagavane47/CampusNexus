@@ -113,10 +113,10 @@ export async function createEscrowTransaction(
 
     // Application call to create escrow
     const appArgs = [
-        new Uint8Array(Buffer.from('create_escrow')),
+        new TextEncoder().encode('create_escrow'),
         decodedFreelancer.publicKey,
         encodedMilestones,
-        new Uint8Array(Buffer.from('[]')),
+        new TextEncoder().encode('[]'),
     ];
 
     console.log('[Escrow] Building transaction with appIndex:', CONTRACT_IDS.escrow);
@@ -157,7 +157,7 @@ export async function fundEscrowTransaction(
     });
 
     // Transaction 2: App call to fund_escrow
-    const appArgs = [new Uint8Array(Buffer.from('fund_escrow'))];
+    const appArgs = [new TextEncoder().encode('fund_escrow')];
     const appTxn = algosdk.makeApplicationCallTxnFromObject({
         from: clientAddress,
         suggestedParams: params,
@@ -185,7 +185,7 @@ export async function completeMilestoneTransaction(
     const params = await client.getTransactionParams().do();
 
     const appArgs = [
-        new Uint8Array(Buffer.from('complete_milestone')),
+        new TextEncoder().encode('complete_milestone'),
         algosdk.encodeUint64(milestoneIndex),
     ];
 
@@ -213,7 +213,7 @@ export async function approveMilestoneTransaction(
     const params = await client.getTransactionParams().do();
 
     const appArgs = [
-        new Uint8Array(Buffer.from('approve_milestone')),
+        new TextEncoder().encode('approve_milestone'),
         algosdk.encodeUint64(milestoneIndex),
         algosdk.encodeUint64(amountAlgo * 1_000_000),  // Convert to microALGOs
     ];
@@ -263,3 +263,98 @@ export default {
     formatAlgo,
     CONTRACT_IDS,
 };
+
+// Import TEAL programs
+import { APPROVAL_PROGRAM, CLEAR_PROGRAM } from '../contracts/escrow';
+
+/**
+ * Compile TEAL program
+ */
+async function compileProgram(client, programSource) {
+    const encoder = new TextEncoder();
+    const programBytes = encoder.encode(programSource);
+    const compileResponse = await client.compile(programBytes).do();
+    // Browser-compatible Base64 decode
+    const binaryString = atob(compileResponse.result);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+}
+
+/**
+ * Deploy a new Escrow Contract
+ */
+export async function deployEscrowContract(
+    clientAddress,
+    freelancerAddress,
+    numMilestones,
+    totalAmountAlgo
+) {
+    console.log('[Escrow] deployEscrowContract called with:', {
+        client: clientAddress,
+        freelancer: freelancerAddress,
+        milestones: numMilestones,
+        amount: totalAmountAlgo
+    });
+
+    if (!clientAddress) {
+        throw new Error('deployEscrowContract: clientAddress is missing');
+    }
+    const cleanClientAddress = clientAddress.trim();
+    if (!algosdk.isValidAddress(cleanClientAddress)) {
+        throw new Error(`deployEscrowContract: Invalid client address: "${cleanClientAddress}"`);
+    }
+
+    const client = getAlgodClient();
+    const params = await client.getTransactionParams().do();
+
+    // Compile programs
+    let approvalProgram, clearProgram;
+    try {
+        console.log('[Escrow] Compiling approval program...');
+        approvalProgram = await compileProgram(client, APPROVAL_PROGRAM);
+        console.log('[Escrow] Compiling clear program...');
+        clearProgram = await compileProgram(client, CLEAR_PROGRAM);
+    } catch (e) {
+        throw new Error(`Compilation failed: ${e.message}`);
+    }
+
+    // Prepare arguments
+    const selector = new Uint8Array([0xab, 0x65, 0x04, 0x4f]);
+    const decodedFreelancer = algosdk.decodeAddress(freelancerAddress || cleanClientAddress);
+    const encodedMilestones = algosdk.encodeUint64(numMilestones);
+
+    const appArgs = [
+        selector,
+        decodedFreelancer.publicKey,
+        encodedMilestones
+    ];
+
+    console.log('[Escrow] Creating ApplicationCreate transaction...');
+
+    const txn = algosdk.makeApplicationCreateTxnFromObject({
+        from: cleanClientAddress,
+        sender: cleanClientAddress, // Required for algosdk v3
+        suggestedParams: params,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram,
+        numLocalInts: 0,
+        numLocalByteSlices: 0,
+        numGlobalInts: 4,
+        numGlobalByteSlices: 4,
+        appArgs: appArgs,
+        accounts: [],
+        foreignApps: [],
+        foreignAssets: [],
+        boxes: [],
+        note: new Uint8Array(0)
+    });
+
+    return txn;
+
+    return txn;
+}

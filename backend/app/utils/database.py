@@ -85,7 +85,7 @@ def create_user(user_create: UserCreate) -> User:
         oauth_id=user_create.oauth_id,
         created_at=now,
         last_login=now,
-        college="VIT Pune"
+        college=""
     )
     
     users.append(user.model_dump())
@@ -261,6 +261,36 @@ def apply_to_project(project_id: int, applicant_id: str) -> Optional[Dict]:
             return project
     
 
+    return None
+
+
+def hire_freelancer(project_id: int, freelancer_id: str, escrow_app_id: int, freelancer_wallet: str) -> Optional[Dict]:
+    """Hire a freelancer for a project and store escrow details."""
+    projects = load_projects()
+    
+    for i, project in enumerate(projects):
+        if project.get("id") == project_id:
+            # Update project with hired freelancer and escrow details
+            project["status"] = "in_progress"
+            project["hired_freelancer_id"] = freelancer_id
+            project["hired_freelancer_wallet"] = freelancer_wallet
+            project["escrow_app_id"] = escrow_app_id
+            project["hired_at"] = datetime.utcnow().isoformat()
+            
+            projects[i] = project
+            save_projects(projects)
+            
+            # Create notification for hired freelancer
+            create_notification(NotificationCreate(
+                user_id=freelancer_id,
+                title="Congratulations! You've been hired!",
+                message=f"You've been selected for: {project.get('title')}. The escrow has been funded.",
+                type="hired",
+                related_id=str(project_id)
+            ))
+            
+            return project
+    
     return None
 
 
