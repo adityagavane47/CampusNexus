@@ -2,7 +2,7 @@
 ## CampusNexus
 ### The Decentralized Ecosystem for Student Creators and Commerce
 
-**CampusNexus** is a "Decentralized LinkedIn" and marketplace designed for the modern campus. It connects students through project collaboration and a secure marketplace, all powered by the speed and transparency of the **Algorand Blockchain** and automated by AI.
+**CampusNexus** is a "Decentralized Ecosystem" and marketplace designed for the modern campus. It connects students through project collaboration and a secure marketplace, all powered by the speed and transparency of the **Algorand Blockchain** and automated by AI.
 
 ---
 
