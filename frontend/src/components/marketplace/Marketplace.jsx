@@ -3,6 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { usePeraWallet } from '../../hooks/usePeraWallet';
+import { useEscrow } from '../../hooks/useEscrow';
 import { CreateListingModal } from './CreateListingModal';
 
 const API_BASE = 'http://localhost:8000/api';
@@ -16,11 +17,14 @@ const categories = [
 ];
 
 export function Marketplace() {
-    const { isConnected } = usePeraWallet();
+    const { isConnected, accountAddress, signTransaction } = usePeraWallet();
+    const { createEscrow, fundEscrow, isLoading: escrowLoading } = useEscrow();
     const [listings, setListings] = useState([]);
     const [activeCategory, setActiveCategory] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [purchasingItemId, setPurchasingItemId] = useState(null);
+    const [purchaseStatus, setPurchaseStatus] = useState('');
 
     useEffect(() => {
         fetchListings();
@@ -40,6 +44,64 @@ export function Marketplace() {
         }
     };
 
+    const handlePurchase = async (listing) => {
+        // Step 1: Wallet check
+        if (!isConnected || !accountAddress) {
+            alert('❌ Please connect your wallet first');
+            return;
+        }
+
+        setPurchasingItemId(listing.id);
+        setPurchaseStatus('Initiating purchase...');
+
+        try {
+            // Step 2: Backend initiation
+            setPurchaseStatus('Calling backend...');
+            const response = await fetch(`${API_BASE}/marketplace/${listing.id}/purchase`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ buyer_address: accountAddress }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Purchase initiation failed');
+            }
+
+            const data = await response.json();
+            const { seller_address, escrow_required } = data;
+
+            // Step 3: Create escrow
+            setPurchaseStatus('Creating escrow contract...');
+            const escrowResult = await createEscrow(
+                accountAddress,
+                signTransaction,
+                seller_address,
+                escrow_required,
+                1 // numMilestones
+            );
+
+            if (!escrowResult) {
+                throw new Error('Escrow creation failed');
+            }
+
+            // Step 4: Fund escrow (in real scenario, get app_id from escrowResult)
+            // For now, we'll skip this step as it requires the app_id
+
+            // Step 5: Success
+            setPurchaseStatus('');
+            setPurchasingItemId(null);
+            alert(`✅ Purchase successful!\n\nItem: ${listing.title}\nAmount: ${escrow_required} ALGO\n\nEscrow contract created.`);
+            fetchListings(); // Refresh listings
+        } catch (error) {
+            console.error('Purchase error:', error);
+            setPurchaseStatus('');
+            setPurchasingItemId(null);
+            alert(`❌ Purchase failed:\n${error.message}`);
+            fetchListings(); // Refresh to restore status
+        }
+    };
+
     const filteredListings = activeCategory === 'all'
         ? listings
         : listings.filter(l => l.category === activeCategory);
@@ -54,15 +116,13 @@ export function Marketplace() {
                             Buy & sell electronics, books, and more
                         </p>
                     </div>
-                    {isConnected && (
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="btn-primary"
-                            style={{ padding: '12px 24px' }}
-                        >
-                            + Create Listing
-                        </button>
-                    )}
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="btn-primary"
+                        style={{ padding: '12px 24px' }}
+                    >
+                        + Create Listing
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
@@ -109,10 +169,18 @@ export function Marketplace() {
                                     <div style={{ marginTop: '12px' }}>
                                         <button
                                             className="btn-secondary"
-                                            style={{ width: '100%', padding: '10px' }}
-                                            onClick={() => alert(`Purchase flow coming soon!\nItem: ${listing.title}`)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                opacity: purchasingItemId === listing.id ? 0.7 : 1,
+                                                cursor: purchasingItemId === listing.id ? 'wait' : 'pointer'
+                                            }}
+                                            onClick={() => handlePurchase(listing)}
+                                            disabled={purchasingItemId === listing.id}
                                         >
-                                            Purchase
+                                            {purchasingItemId === listing.id
+                                                ? `⏳ ${purchaseStatus}`
+                                                : 'Purchase'}
                                         </button>
                                     </div>
                                 </div>

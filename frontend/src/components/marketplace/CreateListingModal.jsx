@@ -8,7 +8,7 @@ import { usePeraWallet } from '../../hooks/usePeraWallet';
 const API_BASE = 'http://localhost:8000/api';
 
 export function CreateListingModal({ onClose, onSuccess }) {
-    const { sendTransaction, accountAddress } = usePeraWallet();
+    const { isConnected, accountAddress, connect } = usePeraWallet();
 
     const [formData, setFormData] = useState({
         title: '',
@@ -55,6 +55,13 @@ export function CreateListingModal({ onClose, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Check if wallet is connected
+        if (!accountAddress) {
+            alert('Please connect your Pera Wallet first using the Connect Wallet button in the navigation.');
+            return;
+        }
+
         if (!formData.ipfs_cid) {
             alert('Please upload an image first');
             return;
@@ -69,6 +76,7 @@ export function CreateListingModal({ onClose, onSuccess }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    price_algo: parseFloat(formData.price_algo),
                     seller_address: accountAddress,
                     status: 'available'
                 })

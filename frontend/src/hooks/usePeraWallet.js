@@ -28,15 +28,20 @@ export function usePeraWallet() {
     const [isInitialized, setIsInitialized] = useState(false);
     const [error, setError] = useState(null);
 
-    // Initialize and check for existing connection
+    // Initialize wallet
     useEffect(() => {
         const init = async () => {
             try {
                 const wallet = await getPeraWallet();
 
-                const accounts = await wallet.reconnectSession();
-                if (accounts.length > 0) {
-                    setAccountAddress(accounts[0]);
+                // Try to reconnect existing wallet session
+                try {
+                    const accounts = await wallet.reconnectSession();
+                    if (accounts.length > 0) {
+                        setAccountAddress(accounts[0]);
+                    }
+                } catch (reconnectErr) {
+                    // No existing session - that's fine
                 }
 
                 // Disconnect listener

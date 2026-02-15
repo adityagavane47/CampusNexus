@@ -1,0 +1,16 @@
+{
+  "listings": [
+    {
+      "id": 1,
+      "title": "Laptop bag",
+      "description": "skybag3",
+      "category": "arduino",
+      "price_algo": 12.0,
+      "condition": "good",
+      "ipfs_cid": "QmRoYz5ZB5aigzJsTjEdvHhQjdZcJZfxkirki7egSC6R9y",
+      "seller_address": "J2UCDAMJLFKOP7OLPZHTQ2BFF65P7A6LKD3E4OQ6ART4Y4L2HTLDTV2Q4Y",
+      "status": "available",
+      "created_at": "2026-02-15T04:58:02.995992"
+    }
+  ]
+}

@@ -227,8 +227,9 @@ async def update_profile(user_id: str, profile: UserUpdate):
     """Update user profile."""
     # In a real app, verify that the current user matches user_id via JWT
     
-    # We need to convert pydantic model to dict, excluding unset fields
-    update_data = profile.model_dump(exclude_unset=True)
+    # Convert pydantic model to dict, excluding unset but including None values
+    # This allows explicitly setting fields to None (e.g., clearing wallet_address)
+    update_data = profile.model_dump(exclude_unset=True, exclude_none=False)
     
     updated_user = update_user_profile(user_id, update_data)
     

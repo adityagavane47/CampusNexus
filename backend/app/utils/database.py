@@ -114,10 +114,9 @@ def update_user_profile(user_id: str, updates: Dict) -> Optional[User]:
     
     for i, user_data in enumerate(users):
         if user_data.get("id") == user_id:
-            # Update fields
+            # Update fields - allow None values to clear fields
             for key, value in updates.items():
-                if value is not None:
-                    user_data[key] = value
+                user_data[key] = value
             
             users[i] = user_data
             save_users(users)
@@ -350,3 +349,75 @@ def get_unread_count(user_id: str) -> int:
     return sum(1 for n in notifications if n.get("user_id") == user_id and not n.get("is_read"))
 
 
+
+# ===== MARKETPLACE DATABASE FUNCTIONS =====
+
+# Marketplace database file path
+MARKETPLACE_DB_FILE = Path(__file__).parent.parent.parent / "data" / "marketplace.json"
+
+
+def ensure_marketplace_db_exists():
+    """Ensure the marketplace database file exists."""
+    MARKETPLACE_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if not MARKETPLACE_DB_FILE.exists():
+        MARKETPLACE_DB_FILE.write_text(json.dumps({"listings": []}))
+
+
+def load_listings() -> List[Dict]:
+    """Load all listings from the database."""
+    ensure_marketplace_db_exists()
+    with open(MARKETPLACE_DB_FILE, 'r') as f:
+        data = json.load(f)
+    return data.get("listings", [])
+
+
+def save_listings(listings: List[Dict]):
+    """Save all listings to the database."""
+    ensure_marketplace_db_exists()
+    with open(MARKETPLACE_DB_FILE, 'w') as f:
+        json.dump({"listings": listings}, f, indent=2, default=str)
+
+
+def get_all_listings() -> List[Dict]:
+    """Get all marketplace listings."""
+    return load_listings()
+
+
+def create_listing(listing_data: Dict) -> Dict:
+    """Create a new marketplace listing."""
+    listings = load_listings()
+    
+    # Generate listing ID
+    listing_id = len(listings) + 1
+    
+    new_listing = {
+        "id": listing_id,
+        "title": listing_data.get("title"),
+        "description": listing_data.get("description"),
+        "category": listing_data.get("category"),
+        "price_algo": listing_data.get("price_algo"),
+        "condition": listing_data.get("condition"),
+        "ipfs_cid": listing_data.get("ipfs_cid", ""),
+        "seller_address": listing_data.get("seller_address"),
+        "status": "available",
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    
+    listings.append(new_listing)
+    save_listings(listings)
+    
+    return new_listing
+
+
+def update_listing_status(listing_id: int, status: str) -> Optional[Dict]:
+    """Update listing status (e.g. to 'pending' or 'sold')."""
+    listings = load_listings()
+    
+    for i, listing in enumerate(listings):
+        if listing.get("id") == listing_id:
+            listing["status"] = status
+            listings[i] = listing
+            save_listings(listings)
+            return listing
+            
+    return None

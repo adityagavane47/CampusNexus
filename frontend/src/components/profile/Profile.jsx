@@ -209,17 +209,27 @@ export function Profile() {
                                         </span>
                                     )}
                                 </div>
-                                {isConnected && (
+                                {(isConnected || user?.wallet_address) && (
                                     <button
                                         onClick={async () => {
                                             try {
-                                                await disconnect();
-                                                // Optionally clear from backend
+                                                // Clear from backend first
                                                 const { authService } = await import('../../services/auth');
                                                 await authService.updateProfile(user.id, { wallet_address: null });
+
+                                                // Then disconnect wallet
+                                                if (disconnect) {
+                                                    await disconnect();
+                                                }
+
+                                                // Small delay to ensure backend write completes
+                                                await new Promise(resolve => setTimeout(resolve, 500));
+
+                                                // Force reload to refresh user state
                                                 window.location.reload();
                                             } catch (err) {
                                                 console.error('Disconnect error:', err);
+                                                alert('Failed to disconnect wallet. Please try again.');
                                             }
                                         }}
                                         style={{
