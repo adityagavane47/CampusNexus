@@ -1,0 +1,15 @@
+{
+  "network": "testnet",
+  "contracts": {
+    "MilestoneEscrow": {
+      "app_id": 755290899,
+      "app_address": "A3ZIZOIBZJA6VPVAH5ZDOLEFVDFP3XLBYGDXNKIWUPGVN7CHC5U2QAYTRY",
+      "deployer": "SCVK26XPYHJ4MIAPSJWFUDGV2UV6ETE7PGMAPCNWYL62JVXC7OCCBDKERA"
+    },
+    "HustleScore": {
+      "app_id": 755290900,
+      "app_address": "CAP5LVU5C77V5AUIUA5QZIJLBBVVGJCDWLUXZWGDEBMI4EFL33WFFI5UEM",
+      "deployer": "SCVK26XPYHJ4MIAPSJWFUDGV2UV6ETE7PGMAPCNWYL62JVXC7OCCBDKERA"
+    }
+  }
+}

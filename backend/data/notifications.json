@@ -1,0 +1,84 @@
+{
+  "notifications": [
+    {
+      "id": "1",
+      "user_id": "ashwininaresh47@gmail.com",
+      "title": "New Application",
+      "message": "Aditya Gavane applied to your project: Make a login page",
+      "type": "application",
+      "related_id": "2",
+      "is_read": false,
+      "created_at": "2026-02-10T16:16:38.308852"
+    },
+    {
+      "id": "2",
+      "user_id": "ashwininaresh47@gmail.com",
+      "title": "New Application",
+      "message": "Aditya Gavane applied to your project: dsfhbxfbd",
+      "type": "application",
+      "related_id": "3",
+      "is_read": true,
+      "created_at": "2026-02-10T16:19:30.379946"
+    },
+    {
+      "id": "3",
+      "user_id": "gavaneaditya787@gmail.com",
+      "title": "New Application",
+      "message": "Aditya Gavane applied to your project: dsrhdxbndndf",
+      "type": "application",
+      "related_id": "4",
+      "is_read": true,
+      "created_at": "2026-02-10T16:53:45.545528"
+    },
+    {
+      "id": "4",
+      "user_id": "ashwininaresh47@gmail.com",
+      "title": "Congratulations! You've been hired!",
+      "message": "You've been selected for: Redesign. The escrow has been funded.",
+      "type": "hired",
+      "related_id": "1",
+      "is_read": false,
+      "created_at": "2026-02-15T06:26:42.304718"
+    },
+    {
+      "id": "5",
+      "user_id": "gavaneaditya787@gmail.com",
+      "title": "New Application",
+      "message": " testing applied to your project: dsrhdxbndndf",
+      "type": "application",
+      "related_id": "4",
+      "is_read": false,
+      "created_at": "2026-02-15T07:46:37.691205"
+    },
+    {
+      "id": "6",
+      "user_id": "gavaneaditya787@gmail.com",
+      "title": "New Application",
+      "message": " testing applied to your project: to do list",
+      "type": "application",
+      "related_id": "8",
+      "is_read": false,
+      "created_at": "2026-02-15T08:42:30.452477"
+    },
+    {
+      "id": "7",
+      "user_id": "gavaneaditya787@gmail.com",
+      "title": "New Application",
+      "message": " testing applied to your project: Basic login page",
+      "type": "application",
+      "related_id": "9",
+      "is_read": false,
+      "created_at": "2026-02-15T08:44:34.420082"
+    },
+    {
+      "id": "8",
+      "user_id": "gavaneaditya787@gmail.com",
+      "title": "New Application",
+      "message": "Aditya applied to your project: I want to make a login page",
+      "type": "application",
+      "related_id": "5",
+      "is_read": false,
+      "created_at": "2026-02-15T10:58:10.363748"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "appId": "com.vitpune.campusnexus",
+  "appName": "CampusNexus",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "App": {
+      "appUrlOpen": {
+        "handlers": [
+          {
+            "url": "perawallet-wc://*"
+          },
+          {
+            "url": "campusnexus://*"
+          }
+        ]
+      }
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0f0f23"
+    },
+    "Keyboard": {
+      "resize": "native"
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0f0f23"
+  },
+  "ios": {
+    "backgroundColor": "#0f0f23",
+    "contentInset": "always"
+  }
+}

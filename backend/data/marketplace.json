@@ -1,0 +1,64 @@
+{
+  "listings": [
+    {
+      "id": 1,
+      "title": "Laptop bag",
+      "description": "skybag3",
+      "category": "arduino",
+      "price_algo": 12.0,
+      "condition": "good",
+      "ipfs_cid": "QmRoYz5ZB5aigzJsTjEdvHhQjdZcJZfxkirki7egSC6R9y",
+      "seller_address": "J2UCDAMJLFKOP7OLPZHTQ2BFF65P7A6LKD3E4OQ6ART4Y4L2HTLDTV2Q4Y",
+      "status": "available",
+      "created_at": "2026-02-15T04:58:02.995992"
+    },
+    {
+      "id": 2,
+      "title": "Laptop",
+      "description": "Microsoft laptop",
+      "category": "laptops",
+      "price_algo": 45.0,
+      "condition": "good",
+      "ipfs_cid": "QmbBRSzB7YCjRSFc6eum5nfbTknFtuj66edcpA9LXifCih",
+      "seller_address": "J2UCDAMJLFKOP7OLPZHTQ2BFF65P7A6LKD3E4OQ6ART4Y4L2HTLDTV2Q4Y",
+      "status": "available",
+      "created_at": "2026-02-15T05:42:06.448674"
+    },
+    {
+      "id": 3,
+      "title": "laptop bag",
+      "description": "logitech\n",
+      "category": "laptops",
+      "price_algo": 12.0,
+      "condition": "good",
+      "ipfs_cid": "QmRoYz5ZB5aigzJsTjEdvHhQjdZcJZfxkirki7egSC6R9y",
+      "seller_address": "J2UCDAMJLFKOP7OLPZHTQ2BFF65P7A6LKD3E4OQ6ART4Y4L2HTLDTV2Q4Y",
+      "status": "available",
+      "created_at": "2026-02-15T09:58:46.378898"
+    },
+    {
+      "id": 4,
+      "title": "Microsoft laptop",
+      "description": "8GB RAM",
+      "category": "laptops",
+      "price_algo": 45.0,
+      "condition": "good",
+      "ipfs_cid": "QmbBRSzB7YCjRSFc6eum5nfbTknFtuj66edcpA9LXifCih",
+      "seller_address": "J2UCDAMJLFKOP7OLPZHTQ2BFF65P7A6LKD3E4OQ6ART4Y4L2HTLDTV2Q4Y",
+      "status": "available",
+      "created_at": "2026-02-15T10:04:57.203862"
+    },
+    {
+      "id": 5,
+      "title": "laptop ",
+      "description": "microsoft laptop",
+      "category": "laptops",
+      "price_algo": 34.0,
+      "condition": "good",
+      "ipfs_cid": "QmbBRSzB7YCjRSFc6eum5nfbTknFtuj66edcpA9LXifCih",
+      "seller_address": "J2UCDAMJLFKOP7OLPZHTQ2BFF65P7A6LKD3E4OQ6ART4Y4L2HTLDTV2Q4Y",
+      "status": "available",
+      "created_at": "2026-02-15T10:07:37.754072"
+    }
+  ]
+}

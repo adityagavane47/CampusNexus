@@ -1,0 +1,7 @@
+algokit-client-generator
+algorand-python-testing
+puyapy
+python-dotenv
+algorand-python
+coincurve<20.0.0
+algokit-utils
